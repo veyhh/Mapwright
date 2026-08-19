@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://examples/assets/prop_visual.gd" id="1"]
+[node name="WoodenCrate" type="Node3D"]
+script = ExtResource("1")
+dimensions = Vector3(1.35, 1.2, 1.35)
+color = Color(0.48, 0.25, 0.09, 1)

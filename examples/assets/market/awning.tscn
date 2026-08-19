@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://examples/assets/prop_visual.gd" id="1"]
+[node name="Awning" type="Node3D"]
+script = ExtResource("1")
+dimensions = Vector3(3.0, 0.35, 2.2)
+color = Color(0.72, 0.16, 0.12, 1)

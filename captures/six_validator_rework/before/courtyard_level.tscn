@@ -1,0 +1,149 @@
+[gd_scene load_steps=31 format=3]
+
+[ext_resource type="PackedScene" path="res://examples/assets/props/wooden_crate.tscn" id="1_crate"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/barrel.tscn" id="2_barrel"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/bench.tscn" id="3_bench"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/brazier.tscn" id="4_brazier"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/cart.tscn" id="5_cart"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/fence_short.tscn" id="6_fence"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/hay_bale.tscn" id="7_hay"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/lantern.tscn" id="8_lantern"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/signpost.tscn" id="9_sign"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/well.tscn" id="10_well"]
+[ext_resource type="PackedScene" path="res://examples/assets/rocks/rock_a.tscn" id="11_rock_a"]
+[ext_resource type="PackedScene" path="res://examples/assets/rocks/rock_b.tscn" id="12_rock_b"]
+[ext_resource type="PackedScene" path="res://examples/assets/rocks/rock_c.tscn" id="13_rock_c"]
+[ext_resource type="PackedScene" path="res://examples/assets/foliage/bush_a.tscn" id="14_bush_a"]
+[ext_resource type="PackedScene" path="res://examples/assets/foliage/bush_b.tscn" id="15_bush_b"]
+[ext_resource type="PackedScene" path="res://examples/assets/foliage/fern.tscn" id="16_fern"]
+[ext_resource type="PackedScene" path="res://examples/assets/foliage/flower_patch.tscn" id="17_flowers"]
+[ext_resource type="PackedScene" path="res://examples/assets/trees/oak_small.tscn" id="18_oak"]
+[ext_resource type="PackedScene" path="res://examples/assets/trees/pine_small.tscn" id="19_pine"]
+[ext_resource type="PackedScene" path="res://examples/assets/ruins/arch.tscn" id="20_arch"]
+[ext_resource type="PackedScene" path="res://examples/assets/ruins/column.tscn" id="21_column"]
+[ext_resource type="PackedScene" path="res://examples/assets/ruins/rubble.tscn" id="22_rubble"]
+[ext_resource type="PackedScene" path="res://examples/assets/ruins/wall_broken.tscn" id="23_wall"]
+[ext_resource type="PackedScene" path="res://examples/assets/market/awning.tscn" id="24_awning"]
+[ext_resource type="PackedScene" path="res://examples/assets/market/stall.tscn" id="25_stall"]
+
+[sub_resource type="StandardMaterial3D" id="GroundMaterial"]
+albedo_color = Color(0.48, 0.43, 0.33, 1)
+roughness = 0.94
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+material = SubResource("GroundMaterial")
+size = Vector3(22, 0.25, 18)
+
+[sub_resource type="StandardMaterial3D" id="PathMaterial"]
+albedo_color = Color(0.58, 0.52, 0.42, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="PathMesh"]
+material = SubResource("PathMaterial")
+size = Vector3(2.7, 0.08, 14.5)
+
+[sub_resource type="BoxMesh" id="RestPathMesh"]
+material = SubResource("PathMaterial")
+size = Vector3(5.6, 0.07, 1.7)
+
+[node name="CourtyardLevel" type="Node3D"]
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.18, 0)
+mesh = SubResource("GroundMesh")
+
+[node name="MainPath" type="MeshInstance3D" parent="."]
+position = Vector3(0.6, -0.03, 0.4)
+rotation = Vector3(0, -0.18, 0)
+mesh = SubResource("PathMesh")
+
+[node name="RestAreaPath" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, -0.025, 1.55)
+rotation = Vector3(0, -0.16, 0)
+mesh = SubResource("RestPathMesh")
+
+[node name="SouthEntranceArch" parent="." instance=ExtResource("20_arch")]
+position = Vector3(-1.8, 0, 7.5)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="CentralWell" parent="." instance=ExtResource("10_well")]
+position = Vector3(0, 0, 0)
+
+[node name="MarketStall" parent="." instance=ExtResource("25_stall")]
+position = Vector3(-6.5, 0, -1.5)
+rotation = Vector3(0, 0.12, 0)
+
+[node name="MarketAwning" parent="." instance=ExtResource("24_awning")]
+position = Vector3(-6.5, 2.45, -1.5)
+rotation = Vector3(0, 0.12, 0)
+
+[node name="SupplyCart" parent="." instance=ExtResource("5_cart")]
+position = Vector3(-7.5, 0, 1.0)
+rotation = Vector3(0, -0.55, 0)
+
+[node name="MarketCrateA" parent="." instance=ExtResource("1_crate")]
+position = Vector3(-5.1, 0, 1.7)
+rotation = Vector3(0, 0.2, 0)
+
+[node name="MarketBarrelA" parent="." instance=ExtResource("2_barrel")]
+position = Vector3(-8.4, 0, 2.7)
+
+[node name="HayStorage" parent="." instance=ExtResource("7_hay")]
+position = Vector3(-5.4, 0, 3.6)
+rotation = Vector3(0, 0.4, 0)
+
+[node name="RestBench" parent="." instance=ExtResource("3_bench")]
+position = Vector3(5.1, 0, 1.8)
+rotation = Vector3(0, 1.1, 0)
+
+[node name="EveningBrazier" parent="." instance=ExtResource("4_brazier")]
+position = Vector3(3.2, 0, 3.8)
+
+[node name="PathLantern" parent="." instance=ExtResource("8_lantern")]
+position = Vector3(-2.8, 0, 4.4)
+
+[node name="ExitSign" parent="." instance=ExtResource("9_sign")]
+position = Vector3(8.2, 0, -5.8)
+rotation = Vector3(0, -0.65, 0)
+
+[node name="EastFence" parent="." instance=ExtResource("6_fence")]
+position = Vector3(9.0, 0, -2.2)
+rotation = Vector3(0, 1.5708, 0)
+
+[node name="Oak" parent="." instance=ExtResource("18_oak")]
+position = Vector3(5.6, 0, -6.3)
+
+[node name="Pine" parent="." instance=ExtResource("19_pine")]
+position = Vector3(8.6, 0, -4.7)
+
+[node name="GardenBushA" parent="." instance=ExtResource("14_bush_a")]
+position = Vector3(3.8, 0, -4.2)
+
+[node name="GardenBushB" parent="." instance=ExtResource("15_bush_b")]
+position = Vector3(7.0, 0, -2.5)
+
+[node name="GardenFern" parent="." instance=ExtResource("16_fern")]
+position = Vector3(2.3, 0, -5.6)
+
+[node name="FlowerBed" parent="." instance=ExtResource("17_flowers")]
+position = Vector3(2.0, 0, -3.3)
+
+[node name="GardenRockA" parent="." instance=ExtResource("11_rock_a")]
+position = Vector3(-4.6, 0, -5.2)
+
+[node name="GardenRockB" parent="." instance=ExtResource("12_rock_b")]
+position = Vector3(-2.0, 0, -7.3)
+
+[node name="GardenRockC" parent="." instance=ExtResource("13_rock_c")]
+position = Vector3(1.1, 0, -4.7)
+
+[node name="NorthBrokenWall" parent="." instance=ExtResource("23_wall")]
+position = Vector3(-6.0, 0, -7.2)
+rotation = Vector3(0, 0.08, 0)
+
+[node name="NorthColumn" parent="." instance=ExtResource("21_column")]
+position = Vector3(-9.0, 0, -6.4)
+
+[node name="NorthRubble" parent="." instance=ExtResource("22_rubble")]
+position = Vector3(-7.5, 0, -5.3)
+rotation = Vector3(0, -0.3, 0)

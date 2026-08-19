@@ -1,0 +1,20 @@
+# Godot projesinin kök dizini.
+godot_project_path: "./path/to/godot-project"
+
+# Godot PATH üzerinde değilse çalıştırılabilir dosyanın yolu. Opsiyoneldir.
+godot_executable_path: null
+
+# Godot proje köküne göre sahnenin relative yolu.
+target_scene: "scenes/main.tscn"
+
+# Kullanılacak asset pack'in yolu.
+asset_pack_path: "./path/to/asset-pack"
+
+# Capture çıktılarının yazılacağı dizin.
+capture_output_dir: "./captures"
+
+# Desteklenen öntanımlı capture açıları.
+capture_angles:
+  - "top_down"
+  - "iso_ne"
+  - "iso_sw"

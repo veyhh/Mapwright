@@ -1,0 +1,114 @@
+[gd_scene load_steps=28 format=3]
+
+[ext_resource type="PackedScene" path="res://examples/assets/props/wooden_crate.tscn" id="1_crate"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/barrel.tscn" id="2_barrel"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/bench.tscn" id="3_bench"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/brazier.tscn" id="4_brazier"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/cart.tscn" id="5_cart"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/fence_short.tscn" id="6_fence"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/hay_bale.tscn" id="7_hay"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/lantern.tscn" id="8_lantern"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/signpost.tscn" id="9_sign"]
+[ext_resource type="PackedScene" path="res://examples/assets/props/well.tscn" id="10_well"]
+[ext_resource type="PackedScene" path="res://examples/assets/rocks/rock_a.tscn" id="11_rock_a"]
+[ext_resource type="PackedScene" path="res://examples/assets/rocks/rock_b.tscn" id="12_rock_b"]
+[ext_resource type="PackedScene" path="res://examples/assets/rocks/rock_c.tscn" id="13_rock_c"]
+[ext_resource type="PackedScene" path="res://examples/assets/foliage/bush_a.tscn" id="14_bush_a"]
+[ext_resource type="PackedScene" path="res://examples/assets/foliage/bush_b.tscn" id="15_bush_b"]
+[ext_resource type="PackedScene" path="res://examples/assets/foliage/fern.tscn" id="16_fern"]
+[ext_resource type="PackedScene" path="res://examples/assets/foliage/flower_patch.tscn" id="17_flowers"]
+[ext_resource type="PackedScene" path="res://examples/assets/trees/oak_small.tscn" id="18_oak"]
+[ext_resource type="PackedScene" path="res://examples/assets/trees/pine_small.tscn" id="19_pine"]
+[ext_resource type="PackedScene" path="res://examples/assets/ruins/arch.tscn" id="20_arch"]
+[ext_resource type="PackedScene" path="res://examples/assets/ruins/column.tscn" id="21_column"]
+[ext_resource type="PackedScene" path="res://examples/assets/ruins/rubble.tscn" id="22_rubble"]
+[ext_resource type="PackedScene" path="res://examples/assets/ruins/wall_broken.tscn" id="23_wall"]
+[ext_resource type="PackedScene" path="res://examples/assets/market/awning.tscn" id="24_awning"]
+[ext_resource type="PackedScene" path="res://examples/assets/market/stall.tscn" id="25_stall"]
+
+[sub_resource type="StandardMaterial3D" id="GroundMaterial"]
+albedo_color = Color(0.31, 0.42, 0.25, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+material = SubResource("GroundMaterial")
+size = Vector3(24, 0.3, 18)
+
+[node name="RepetitiveVillageSquare" type="Node3D"]
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.2, 0)
+mesh = SubResource("GroundMesh")
+
+[node name="Crate01" parent="." instance=ExtResource("1_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -4)
+
+[node name="Crate02" parent="." instance=ExtResource("1_crate")]
+transform = Transform3D(0.98, 0, -0.2, 0, 1, 0, 0.2, 0, 0.98, -4.5, 0, -3.8)
+
+[node name="Crate03" parent="." instance=ExtResource("1_crate")]
+transform = Transform3D(0.92, 0, 0.39, 0, 1, 0, -0.39, 0, 0.92, -3, 0, -4.2)
+
+[node name="Crate04" parent="." instance=ExtResource("1_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, -3.9)
+
+[node name="Crate05" parent="." instance=ExtResource("1_crate")]
+transform = Transform3D(0.7, 0, -0.7, 0, 1, 0, 0.7, 0, 0.7, 1.5, 0, -4.1)
+
+[node name="Crate06" parent="." instance=ExtResource("1_crate")]
+transform = Transform3D(0.86, 0, 0.5, 0, 1, 0, -0.5, 0, 0.86, 3, 0, -3.7)
+
+[node name="Crate07" parent="." instance=ExtResource("1_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0, -4.2)
+
+[node name="Crate08" parent="." instance=ExtResource("1_crate")]
+transform = Transform3D(0.96, 0, -0.28, 0, 1, 0, 0.28, 0, 0.96, 6, 0, -3.8)
+
+[node name="Barrel" parent="." instance=ExtResource("2_barrel")]
+position = Vector3(-8, 0, 0)
+[node name="Bench" parent="." instance=ExtResource("3_bench")]
+position = Vector3(-5, 0, 1)
+[node name="Brazier" parent="." instance=ExtResource("4_brazier")]
+position = Vector3(-2, 0, 1.5)
+[node name="Cart" parent="." instance=ExtResource("5_cart")]
+position = Vector3(2, 0, 1)
+[node name="Fence" parent="." instance=ExtResource("6_fence")]
+position = Vector3(6, 0, 0)
+[node name="HayBale" parent="." instance=ExtResource("7_hay")]
+position = Vector3(8, 0, 2)
+[node name="Lantern" parent="." instance=ExtResource("8_lantern")]
+position = Vector3(-8, 0, 4)
+[node name="Signpost" parent="." instance=ExtResource("9_sign")]
+position = Vector3(-5, 0, 5)
+[node name="Well" parent="." instance=ExtResource("10_well")]
+position = Vector3(0, 0, 4)
+[node name="RockA" parent="." instance=ExtResource("11_rock_a")]
+position = Vector3(5, 0, 4)
+[node name="RockB" parent="." instance=ExtResource("12_rock_b")]
+position = Vector3(7, 0, 5)
+[node name="RockC" parent="." instance=ExtResource("13_rock_c")]
+position = Vector3(9, 0, 6)
+[node name="BushA" parent="." instance=ExtResource("14_bush_a")]
+position = Vector3(-9, 0, 7)
+[node name="BushB" parent="." instance=ExtResource("15_bush_b")]
+position = Vector3(-6, 0, 7)
+[node name="Fern" parent="." instance=ExtResource("16_fern")]
+position = Vector3(-3, 0, 7)
+[node name="FlowerPatch" parent="." instance=ExtResource("17_flowers")]
+position = Vector3(0, 0, 7)
+[node name="OakSmall" parent="." instance=ExtResource("18_oak")]
+position = Vector3(3, 0, 7)
+[node name="PineSmall" parent="." instance=ExtResource("19_pine")]
+position = Vector3(6, 0, 7)
+[node name="RuinArch" parent="." instance=ExtResource("20_arch")]
+position = Vector3(9, 0, 8)
+[node name="RuinColumn" parent="." instance=ExtResource("21_column")]
+position = Vector3(-10, 0, -7)
+[node name="Rubble" parent="." instance=ExtResource("22_rubble")]
+position = Vector3(-7, 0, -7)
+[node name="BrokenWall" parent="." instance=ExtResource("23_wall")]
+position = Vector3(0, 0, -7)
+[node name="MarketAwning" parent="." instance=ExtResource("24_awning")]
+position = Vector3(5, 0, -7)
+[node name="MarketStall" parent="." instance=ExtResource("25_stall")]
+position = Vector3(9, 0, -7)

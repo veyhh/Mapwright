@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://examples/assets/prop_visual.gd" id="1"]
+[node name="Signpost" type="Node3D"]
+script = ExtResource("1")
+dimensions = Vector3(0.45, 2.8, 0.45)
+color = Color(0.42, 0.26, 0.12, 1)

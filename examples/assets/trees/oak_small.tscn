@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://examples/assets/prop_visual.gd" id="1"]
+[node name="OakSmall" type="Node3D"]
+script = ExtResource("1")
+shape = 3
+dimensions = Vector3(1.8, 4.8, 1.8)
+color = Color(0.18, 0.4, 0.12, 1)

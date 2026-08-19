@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://examples/assets/prop_visual.gd" id="1"]
+[node name="FlowerPatch" type="Node3D"]
+script = ExtResource("1")
+shape = 2
+dimensions = Vector3(1.4, 0.45, 1.4)
+color = Color(0.75, 0.18, 0.55, 1)

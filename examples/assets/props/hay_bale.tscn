@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://examples/assets/prop_visual.gd" id="1"]
+[node name="HayBale" type="Node3D"]
+script = ExtResource("1")
+dimensions = Vector3(1.8, 0.9, 1.1)
+color = Color(0.82, 0.62, 0.15, 1)

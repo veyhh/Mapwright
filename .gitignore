@@ -1,0 +1,11 @@
+.godot/
+
+# Ignore ad-hoc capture output, but keep the verified v0.1 case study.
+captures/*
+!captures/six_validator_rework/
+captures/six_validator_rework/*
+!captures/six_validator_rework/before/
+!captures/six_validator_rework/after/
+
+__pycache__/
+*.py[cod]
