@@ -9,3 +9,8 @@ captures/six_validator_rework/*
 
 __pycache__/
 *.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Generated analysis output.
+reports/

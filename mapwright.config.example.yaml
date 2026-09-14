@@ -1,20 +1,110 @@
-# Godot projesinin kök dizini.
-godot_project_path: "./path/to/godot-project"
+# Mapwright configuration. Every key is optional: with no config file at all,
+# the built-in defaults run the full engine-independent pipeline.
+#
+# Save as mapwright.config.yaml in the working directory and it is picked up
+# automatically, or pass --config PATH.
 
-# Godot PATH üzerinde değilse çalıştırılabilir dosyanın yolu. Opsiyoneldir.
-godot_executable_path: null
+# Genre profile applied first; anything below overrides it.
+# One of: fps, horror, stealth, platformer, moba, exploration.
+profile: fps
 
-# Godot proje köküne göre sahnenin relative yolu.
-target_scene: "scenes/main.tscn"
+# The body every clearance, gap, and travel-time check is measured against.
+# Getting this right matters more than any threshold: it decides what counts
+# as a passable gap and how long a route takes.
+player:
+  radius: 0.45
+  height: 1.8
+  walk_speed: 4.5
+  sprint_speed: 7.0
+  crouch_height: 1.1
+  jump_height: 1.2
+  jump_distance: 3.8
+  interaction_reach: 2.0
 
-# Kullanılacak asset pack'in yolu.
-asset_pack_path: "./path/to/asset-pack"
+# Only the lines you want to move; the rest keep their profile or default value.
+thresholds:
+  # Spatial
+  repetition_percent: 5.0
+  minimum_spacing: 1.5
+  density_cell_size: 3.0
+  density_imbalance: 55.0
+  landmark_candidate_ratio: 1.15
+  landmark_hierarchy_factor: 1.5
+  # Navigation. minimum_path_width defaults to the player diameter when 0.
+  navigation_cell_size: 0.25
+  navigation_minimum_region_area: 1.0
+  minimum_path_width: 0.0
+  # Flow
+  chokepoint_width: 2.0
+  traversal_concentration: 55.0
+  dead_end_ratio: 35.0
+  minimum_route_diversity: 2.0
+  # Pacing
+  max_consecutive_high: 3.0
+  abrupt_transition_delta: 2.0
+  # Encounter
+  cover_height_min: 0.6
+  cover_height_max: 2.0
+  high_ground_delta: 1.0
+  minimum_encounter_entrances: 2.0
+  minimum_flank_routes: 1.0
+  # Fairness
+  travel_time_asymmetry: 10.0
+  cover_asymmetry: 25.0
+  choke_width_asymmetry: 20.0
+  # Visual readability
+  visual_mass_imbalance: 65.0
+  empty_zone_ratio: 50.0
 
-# Capture çıktılarının yazılacağı dizin.
-capture_output_dir: "./captures"
+# How findings become scores. Each category starts at 100 and loses
+# penalties[severity] per kind of finding, damped over repeats.
+scoring:
+  weights:
+    spatial: 1.0
+    flow: 1.0
+    navigation: 1.0
+    pacing: 1.0
+    encounter: 1.0
+    fairness: 1.0
+    visual: 1.0
+  penalties:
+    INFO: 2.0
+    WARNING: 8.0
+    ERROR: 18.0
+    CRITICAL: 34.0
+  # Review notes measure a proxy, so they cost a fraction of a proven defect.
+  advisory_factor: 0.4
 
-# Desteklenen öntanımlı capture açıları.
-capture_angles:
-  - "top_down"
-  - "iso_ne"
-  - "iso_sw"
+# Raise or lower one finding without touching a threshold. Useful when a
+# genre-correct choice keeps getting flagged.
+severity_overrides:
+  dead_end: INFO
+
+# Maximum correction passes in `mapwright improve`.
+iterations:
+  max: 3
+
+# approximate: engine-independent occupancy grid (the supported path).
+# engine: delegate to the engine's own navigation; declared, not yet shipped.
+navigation:
+  mode: approximate
+
+capture:
+  views:
+    - top_down
+    - iso_ne
+    - iso_sw
+  output_dir: ./captures
+
+report_dir: ./reports
+
+# Only needed for engine import, export, or capture.
+engine:
+  project_path: ./path/to/godot-project
+  executable_path: null
+  target_scene: scenes/main.tscn
+  asset_pack_path: ./path/to/asset-pack
+
+# v0.1 documents still load: godot_project_path, godot_executable_path,
+# target_scene, asset_pack_path, capture_output_dir and capture_angles are
+# read into the keys above rather than rejected.

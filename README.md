@@ -1,273 +1,278 @@
 # Mapwright
 
-![Godot 4.x](docs/badges/godot-4x.svg) ![Python 3.10+](docs/badges/python-310.svg) ![MIT License](docs/badges/license-mit.svg) ![6 validators](docs/badges/validators-6.svg)
+![engine-agnostic](docs/badges/engine-agnostic.svg) ![Python 3.10+](docs/badges/python-310.svg) ![MIT License](docs/badges/license-mit.svg) ![11 analyzers](docs/badges/analyzers-11.svg) ![112 tests](docs/badges/tests-112.svg)
 
-Mapwright is a **Claude Code level-design skill and a suite of six deterministic validators for Godot 4.x**. It does not claim to make AI “design levels.” It gives a coding agent a repeatable way to evaluate and improve its own spatial composition using measurable checks and three rendered views. The result is a narrow, testable workflow—not a replacement for design judgment or playtesting.
+**Engine-agnostic level design director for AI coding agents.** Mapwright plans, builds, evaluates, and iteratively improves playable spaces using measurable spatial, gameplay, flow, and visual checks.
 
-> **Mapwright v0.1 is under active development.** It provides a working, tested pipeline within a deliberately limited scope.
-
-## v0.1 scope
-
-### What it does
-
-- Statically analyzes Godot 4.x `.tscn` scenes.
-- Guides Claude Code through zone planning, systematic placement, six numerical checks, three-view visual review, and iterative correction.
-- Produces repeatable terminal reports when given the same scene and thresholds.
-- Treats deletion as a last resort: repositioning, redistribution, rotation, rescaling, or appropriate asset replacement come first.
-- Captures `top_down`, `iso_ne`, and `iso_sw` PNG views through Godot 4.x.
-
-### What it does not do
-
-- It does not support Godot 3.x, Unity, or Unreal.
-- It is not packaged as a skill for ChatGPT or coding agents other than Claude Code.
-- It does not design gameplay, encounters, combat, quests, pacing, AI behavior, or economies. Its target is spatial composition quality.
-- It does not run a Godot physics simulation, bake a real NavigationMesh, or replace playtesting.
-- It does not prove aesthetic quality with a single score. Validator warnings are evidence for agent or human review.
-- It does not cover every asset pipeline. v0.1 has been tested with the single example `.tscn` asset pack in this repository; imported meshes without serialized dimensions may remain unresolved.
-
-## The pipeline
+It is not a map generator. It is the reasoning, validation, and correction layer around whatever builds the map: it reads a level, measures how it plays, explains what it found in terms a designer can argue with, proposes the specific edit that would fix it, applies the ones it can verify, and measures again.
 
 ```text
-┌─────────────────────┐
-│ 1. Plan             │  Define purpose, zones, routes, landmarks,
-│    zones + intent   │  negative space, and density targets.
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 2. Block out        │  Establish boundaries, traversable space,
-│    space + routes   │  major elevation, and sightline intent.
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 3. Place            │  Add structures, landmarks, gameplay props,
-│    systematically   │  and secondary dressing—in that order.
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ 4. Validate         │  Run all 6 validators, then inspect
-│    numbers + views  │  top-down and 2 isometric captures.
-└──────────┬──────────┘
-           │
-     actionable issue?
-       ┌───┴────┐
-      yes       no ───────────────► Report the verified result
-       │
-       ▼
-┌─────────────────────┐
-│ 5. Correct          │  Reposition and redistribute first;
-│    without erasing  │  do not optimize one metric in isolation.
-└──────────┬──────────┘
-           │
-           └──────────────► Return to step 4 (maximum 3 correction passes)
+UNDERSTAND → PLAN → BUILD → MEASURE → REVIEW → CORRECT → REBUILD
 ```
 
-Validators run in this order:
+> **v0.2 is a rewrite.** v0.1 was a suite of six validators that parsed Godot `.tscn` files directly. v0.2 parses once into an engine-independent **Scene IR**; every analyzer reads only that. The v0.1 command line still works and still produces identical numbers — see [Backward compatibility](#backward-compatibility).
 
-`repetition → spacing → density → landmark → navigation → sightline → visual capture`
+## What it does
 
-Landmark and sightline warnings are review notes, not unconditional correction commands: size, position, uniqueness, color, and semantic importance are not equivalent. A navigation `GRID-SENSITIVE` warning is not proof of disconnection either; verify it with a finer grid, captures, and manual review.
+```bash
+$ mapwright analyze examples/outpost_level.json
+```
 
-## Six deterministic validators
+```text
+Mapwright analysis: outpost (generic, profile generic)
 
-| Validator | What it measures | Honest limitation |
+Spatial Quality      26
+Flow                 75
+Navigation           100
+Pacing               84
+Encounter            82
+Fairness             n/a (Fairness analysis needs spawn points for two or more teams.)
+Visual Readability   83
+
+Overall score:       75 / 100
+
+REVIEW — score 75/100, 30 warning(s)
+
+WARNING  chokepoint
+         courtyard -> tunnel is the only route between two halves of the level
+         (3 place(s) on one side, 4 on the other). It is 4.00 m wide and carries
+         50% of routed journeys.
+         -> Add a second connection between the courtyard side and the tunnel
+            side so the split is a choice rather than a single point of failure.
+
+WARNING  missing_relief [arena]
+         arena peaks at intense and nothing follows it.
+         -> Add a relief beat after arena — a calm or low zone, or a relief-typed
+            space such as a safe room or an exit approach — so the peak has an
+            aftermath.
+```
+
+Then let it correct what it can:
+
+```bash
+$ mapwright improve examples/outpost_level.json
+```
+
+```text
+Spatial Quality      26 -> 54 (+28)
+Flow                 75 -> 78 (+3)
+Navigation           100 -> 97 (-3)
+Pacing               84 -> 84 (+0)
+Encounter            82 -> 82 (+0)
+Fairness             n/a -> n/a
+Visual Readability   83 -> 88 (+5)
+
+Overall score:       75 -> 81 (+6)
+```
+
+Three passes, 11 corrections applied, 9 rejected after measurement, 33 findings down to 23. Every applied change was verified to raise the score on its own; the ones that traded one finding for another were reported and discarded. The navigation dip is real and reported rather than hidden — moving props to relieve crowding cost a little clearance elsewhere.
+
+The findings it could not fix itself are stated as design work, not faked:
+
+```text
+Needs a design decision
+- no_flank_route — arena: Add a route to arena that shares no segment with the
+  main approach — a parallel corridor, a rooftop, a service tunnel — so the
+  fight can be opened from a second direction.
+```
+
+## Quick start
+
+```bash
+pip install -e .
+
+mapwright doctor                          # what works in this environment
+mapwright inspect  <scene>                # what Mapwright sees, and what it cannot measure
+mapwright analyze  <scene>                # every check, plus reports/level_report.{md,json}
+mapwright flow     <scene>                # or: pacing, encounter, fairness
+mapwright improve  <scene> --write-scene out.tscn
+mapwright capture  <scene> --output captures/
+```
+
+Scene type is detected from the extension (`.tscn` → Godot, `.json` → Scene IR, `.blend` → Blender) and can be forced with `--engine`. Genre is selected with `--profile`.
+
+## Architecture
+
+The one rule the codebase enforces: **core never knows an engine.**
+
+```text
+        .tscn        .json        .blend        .unity / .umap
+          │            │            │                 │
+          ▼            ▼            ▼                 ▼
+   ┌──────────────────────────────────────────────────────────┐
+   │  adapters/   the only layer allowed to import an engine   │
+   └──────────────────────────────┬───────────────────────────┘
+                                  ▼
+                        ┌───────────────────┐
+                        │     Scene IR      │   flat, world-space,
+                        │  JSON, Y-up, m    │   deterministic
+                        └─────────┬─────────┘
+                                  ▼
+   ┌──────────────────────────────────────────────────────────┐
+   │  core/      geometry · occupancy grid · clearance ·       │
+   │             route graph · zones · scoring                 │
+   ├──────────────────────────────────────────────────────────┤
+   │  design/    flow · pacing · encounters · composition ·    │
+   │             readability · correction                      │
+   ├──────────────────────────────────────────────────────────┤
+   │  validators/  thresholds → explainable findings            │
+   ├──────────────────────────────────────────────────────────┤
+   │  review/    structural · visual · Markdown + JSON report  │
+   └──────────────────────────────────────────────────────────┘
+```
+
+`design/` measures without opinion; `validators/` applies thresholds and raises findings. That split is why one set of checks serves every genre: only the numbers move.
+
+## Scene IR
+
+Every adapter produces this, and only this. Right-handed, Y-up, metres, Euler rotations in intrinsic Y-X-Z order, world-space transforms with no hierarchy.
+
+```json
+{
+  "scene": "courtyard",
+  "units": "meters",
+  "coordinate_system": "Y_UP",
+  "objects": [
+    {
+      "id": "tree_01",
+      "name": "Oak Tree",
+      "type": "prop",
+      "asset": "oak_tree",
+      "position": [3.2, 0.0, -5.4],
+      "rotation": [0.0, 1.57, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "bounds": { "min": [-1.0, 0.0, -1.0], "max": [1.0, 5.0, 1.0] },
+      "tags": ["foliage", "landmark_candidate"]
+    }
+  ],
+  "zones": [
+    { "name": "courtyard", "type": "exploration", "pacing": "medium",
+      "bounds": { "min": [-12, 0, -15], "max": [0, 6, 15] } }
+  ],
+  "entry_points": [], "spawn_points": [], "objectives": [], "exits": [], "landmarks": []
+}
+```
+
+Geometry alone cannot say what a space is *for*, so zones carry intent and markers carry gameplay structure. Declaring them is what turns Mapwright from a prop checker into a level-design tool: without zones there is no pacing to judge, and without spawns there is no fairness question to ask. `Z_UP` documents are converted on load. See [`examples/outpost_level.json`](examples/outpost_level.json).
+
+## What it measures
+
+| System | Measures | Honest limitation |
 |---|---|---|
-| 🔁 **Repetition** | Counts scene `ExtResource` references used by nodes, calculates each asset's share of total usage, and flags values above the configured threshold. | It cannot judge the spatial rhythm or design intent of repetition. Percentage thresholds are sensitive in small scenes, and visually similar assets are not grouped into families. |
-| 📏 **Spacing** | Resolves prop nodes' global `Transform3D` positions and compares their center-to-center 3D Euclidean distances. Cameras, lights, markers, and ground/path support nodes are filtered out. | It measures centers rather than mesh surfaces or collision shapes, so objects with very different dimensions can produce misleading results. |
-| 🔲 **Density** | Divides the supported ground geometry's XZ bounds into equal-area cells, counts prop origins, and reports a heatmap, empty-cell ratio, variance, standard deviation, and imbalance score. | Results depend on cell size and count origins rather than footprints. Intentional plazas or negative space may correctly appear empty. |
-| 🗼 **Landmark** | Derives a world-AABB diagonal from `dimensions` metadata, `custom_aabb`, or supported primitive mesh/CSG sizes, then estimates relative size and hierarchy against the scene median. | This is a heuristic. It does not measure position, uniqueness, color, lighting, silhouette, or narrative importance, and cannot reliably infer dimensions absent from imported mesh serialization. |
-| 🧭 **Navigation** | Inflates prop AABB footprints by the required passage radius, builds an XZ occupancy grid, and uses flood-fill to measure significant connected free-space regions and prop approaches. | This is a coarse, grid-sensitive 2D estimate. It ignores height, slopes, stairs, jumping, crouching, doors, dynamic obstacles, collision layers, and real NavigationMesh behavior; rotated AABBs are conservative. |
-| 👁️ **Sightline** | Casts 3D line segments from deterministic spawn/entry/coverage points to a configured height inside landmark AABBs, testing intersections against other world AABBs. | This is not a physics raycast. Conservative AABBs ignore transparency, gaps in foliage or meshes, animation, and semantic knowledge of the main route. |
+| 🔁 **Repetition** | each asset's share of total placements | cannot tell rhythm from laziness |
+| 📏 **Spacing** | centre distances, plus surface gaps narrower than the player | measures boxes, not silhouettes |
+| 🔲 **Density** | equal-area grid distribution, imbalance score, heatmap | depends on cell size; counts origins |
+| 🗼 **Landmark** | size hierarchy from intrinsic dimensions | size is not importance, uniqueness, or lighting |
+| 🧭 **Navigation** | connected walkable space, clearance, reachability | an occupancy grid, not the engine's navmesh |
+| 🔀 **Flow** | critical path, loops, dead ends, chokepoints, route diversity, traversal concentration | cannot tell a mistake from a set piece |
+| 🎚 **Pacing** | declared intensity sequence, runs, relief, abrupt transitions | cannot judge whether the curve suits the story |
+| ⚔️ **Encounter** | entrances, flanks, high ground, cover spread, retreat, exposure | says nothing about enemy behaviour |
+| ⚖️ **Fairness** | per-team distance, travel time, cover, chokes, flanks | not skill, meta, or spawn timing |
+| 👁 **Sightline** | landmark visibility along real rays | AABB visibility, not rendered occlusion |
+| 🎨 **Visual** | mass balance, silhouette variety, clutter, emptiness | geometric proxies; it has not seen an image |
 
-## Case study: `courtyard_level`
+Every finding states the measurement, why it matters, and what would resolve it:
 
-This is not a deliberately broken fixture. It began as a realistic first-pass layout for a small courtyard and went through three Mapwright correction passes. The same thresholds were rerun against both scene snapshots.
+```text
+WARNING
+62% of critical traversal passes through corridor_03.
+This creates excessive route concentration.
+Recommendation:
+Create an alternate path between courtyard and objective zone.
+```
 
-### Before and after
+Findings marked *review note* measure a proxy rather than the property itself, and are weighted accordingly. Mapwright says so instead of presenting a heuristic as a fact.
 
-<table>
-  <thead>
-    <tr>
-      <th width="50%">Before</th>
-      <th width="50%">After</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><img src="captures/six_validator_rework/before/top_down.png" width="100%" alt="Courtyard before, top-down view"></td>
-      <td><img src="captures/six_validator_rework/after/top_down.png" width="100%" alt="Courtyard after, top-down view"></td>
-    </tr>
-    <tr>
-      <td>One spacing conflict, clustered density, competing size landmarks, and blocked west-side sightlines.</td>
-      <td>Spacing cleared, density improved, size hierarchy clarified, and the measured landmark reached 5/5 viewpoints.</td>
-    </tr>
-  </tbody>
-</table>
+## Genre profiles
 
-Additional views: [before · north-east](captures/six_validator_rework/before/iso_ne.png), [before · south-west](captures/six_validator_rework/before/iso_sw.png), [after · north-east](captures/six_validator_rework/after/iso_ne.png), and [after · south-west](captures/six_validator_rework/after/iso_sw.png). The exact analyzed snapshots are stored under [`before`](captures/six_validator_rework/before/courtyard_level.tscn) and [`after`](captures/six_validator_rework/after/courtyard_level.tscn).
+The same geometry is a defect in one genre and the point in another. Profiles shift thresholds **and** per-finding severity.
 
-### All six metrics
+| Profile | Emphasis | Example effect |
+|---|---|---|
+| `fps` | encounters, flanks, high ground | `frontal_only_engagement` → ERROR |
+| `horror` | confinement, pacing | `dead_end`, `low_route_diversity` → INFO; `missing_relief` → ERROR |
+| `stealth` | route choice, cover | route diversity 3, `poor_cover_distribution` → ERROR |
+| `platformer` | reachability, silhouette | `disconnected_regions` → INFO (islands are the level) |
+| `moba` | symmetry above all | travel-time tolerance 5%, `travel_time_imbalance` → CRITICAL |
+| `exploration` | loops, landmarks | `landmark_never_visible` → ERROR |
 
-| Validator | Before | After | Observed change |
+## Fairness
+
+Give two teams spawn points and Mapwright compares their approaches:
+
+```text
+TEAM A -> CENTRE OBJECTIVE  3.9s over 17.5m, 3 cover, 4 high ground, 1.0m choke, 3 flank route(s)
+TEAM B -> CENTRE OBJECTIVE  4.4s over 19.8m, 2 cover, 4 high ground, 1.0m choke, 2 flank route(s)
+
+TEAM A -> CENTRE OBJECTIVE 3.9s / TEAM B -> CENTRE OBJECTIVE 4.4s / ASYMMETRY 13.0% (limit 10%)
+WARNING Travel-time imbalance exceeds configured threshold.
+```
+
+## Corrections
+
+Corrections are **non-destructive**: nothing is deleted. v0.1 established that deleting props to satisfy a metric leaves density and composition no better and the level poorer, so Mapwright repositions, redistributes, rotates, rescales, or proposes a substitution instead.
+
+They are also **honest**. A correction that needs new geometry, a new route, or a designer's judgement is reported as design work rather than faked. Asset substitution is always proposed, never applied: Mapwright can size-match a candidate but cannot tell whether a barrel reads as cover in that corner.
+
+The improvement loop applies and measures **one change at a time**. A batch is planned against a scene that no longer exists by the time the last edit lands — separating one crowded pair moves a prop into the space the next correction assumed was free. One analysis per candidate buys a monotone loop: every kept change provably raised the score, and every rejected one is reported with the number that rejected it.
+
+## Scoring
+
+Each category starts at 100 and loses points per *kind* of finding, weighted by the profile. Repeated instances of one code are damped (`1 + ln n`) rather than summed: ten crowded pairs is one problem of some size, and a linear sum pins any busy level at zero, where a score can no longer show whether a correction helped.
+
+A category that cannot be assessed is excluded from the overall, not scored zero. A single-player level has no teams to treat unequally; scoring it 0 for fairness would be a statement about the level rather than a measurement of it.
+
+## Adapters
+
+| Engine | Import | Export | Capture |
 |---|---|---|---|
-| Repetition | 25 references, 0 flagged; every asset at `4.00%` | 25 references, 0 flagged; every asset at `4.00%` | Unchanged; asset variety was preserved. |
-| Spacing | 1 `TOO_CLOSE` pair: ExitSign–Pine at `1.170` units | 0 `TOO_CLOSE` pairs | The spacing signal was resolved. |
-| Density | `56.51/100` — **WARNING**; 27/48 empty cells (`56.25%`); densest-cell share `12%` | `50.89/100` — below threshold; 24/48 empty cells (`50.00%`); densest-cell share `8%` | Distribution improved, but half the cells remain empty. The composition is not homogeneous, nor does it need to be. |
-| Landmark | Pine `5.802` + Oak `5.433`; **COMPETING CANDIDATES** | Oak `6.248` as the sole candidate; Pine `4.931`; **CLEAR SIZE HIERARCHY** | Size hierarchy became clearer. The central well's positional and semantic role is not measured by this validator. |
-| Navigation | 1 significant region; largest region `100%`; 25/25 approaches; **GRID-SENSITIVE**; free area `208.56` | 1 significant region + 1 tiny pocket; largest region `99.70%`; 25/25 approaches; **GRID-SENSITIVE**; free area `206.50` | The main space remained connected. The grid-sensitive signal remains a manual review note. |
-| Sightline | Pine 4/5, Oak 4/5; west-side rays blocked by NorthBrokenWall/Oak | Oak 5/5; no blocked rays | The sole measured size landmark is visible from every test point. Pine is no longer a final sightline target because it is no longer a candidate. |
+| **Scene IR JSON** | ✅ | ✅ | — |
+| **Godot 4.x** | ✅ `.tscn` | ✅ surgical text patch | ✅ (needs a Godot executable) |
+| **Blender** | ✅ `.blend` (headless) | — | ✅ (needs a Blender executable) |
+| **Unity** | 📋 documented contract | — | — |
+| **Unreal** | 📋 documented contract | — | — |
 
-The correction deliberately avoided deletion:
+The Godot exporter rewrites only the transform lines of objects that moved, converting world positions back to local space. It never regenerates the file: a scene holds sub-resources, materials, signals, and user content Mapwright does not model, and losing any of it would be unacceptable.
 
-- **5 objects moved:** `PathLantern`, `ExitSign`, `FlowerBed`, `GardenRockC`, `NorthBrokenWall`
-- **2 objects rescaled:** `Oak` (`1.15×`) and `Pine` (`0.85×`)
-- **0 objects deleted; 0 assets added or replaced**
+Unity and Unreal are **deliberately unimplemented**. A `.unity` scene is a GUID-referenced YAML graph whose prefab bounds live elsewhere, and a `.umap` is a binary asset needing the editor; guessing at those bounds would feed every validator numbers that look authoritative and are not. Both modules document exactly what an implementation must satisfy. Until then, export to Scene IR JSON and the whole pipeline runs.
 
-This does not mean the final level is perfect. Density remains sparse, the navigation warning remains, and a semantic landmark such as the well is not captured by a size-only validator. The narrower demonstrated claim is that the pipeline can reduce measurable issues without deleting content while keeping unresolved trade-offs visible.
+### Roadmap
 
-## Installation
+- **v0.3** — Unity importer against the documented contract; engine-mode navigation through Godot's `NavigationServer`; correction of vertical space (ramps, ledges, jump gaps) rather than XZ only.
+- **Later** — Unreal via an editor plugin; Asset Director and Motion Director wired to real services behind the existing `AssetProvider` / `MotionProvider` seams.
 
-### Requirements
+## Honest limitations
 
-- Python **3.10+**
-- Godot **4.x**
-- A working graphics driver and rendering context for captures
+- **Approximate navigation.** Clearance and connectivity come from a top-down occupancy grid with an exact Euclidean distance transform, not a baked navmesh. Vertical traversal, jumps, and ledges are not modelled; `navigation_mode: engine` is a declared seam, not a shipped feature.
+- **Capture is untested in CI.** Neither Godot nor Blender is installed in this repository's test environment, so the capture adapters are exercised only through their availability and failure paths. `mapwright doctor` reports honestly which are usable where you are.
+- **Visual review has not seen an image.** It measures mass, silhouette, clutter, and emptiness geometrically and marks every such finding as a review note. Render the views, look at them, and feed real observations back with `review.visual.ingest_observations`.
+- **Derived topology is a guess.** A scene with no declared markers or zones gets a route graph sampled from open space. It is marked `derived`, its findings are advisory, and the reports say so.
+- **Objects without extents are invisible to spatial checks.** Imported meshes with no serialized dimensions are kept in the IR, excluded from measurement, and listed in every report so a clean spatial section over half-measured geometry cannot be mistaken for a clean level.
+- **Shear is not representable.** Scene IR stores position, Euler rotation, and scale; a sheared transform is decomposed and the shear discarded.
 
-```bash
-python -m venv .venv
-python -m pip install -r requirements.txt
-```
+## Backward compatibility
 
-[`requirements.txt`](requirements.txt) contains only `PyYAML` in v0.1. For local paths, copy [`mapwright.config.example.yaml`](mapwright.config.example.yaml) to `mapwright.config.yaml` and edit its values.
-
-### Connect Mapwright to Claude Code
-
-Copy the entire Mapwright directory—or link it with a symlink/junction—into a Claude Code skill location:
-
-```text
-# Project-specific
-<godot-project>/.claude/skills/mapwright/SKILL.md
-
-# Personal, available across projects
-~/.claude/skills/mapwright/SKILL.md
-```
-
-Claude Code can discover the skill automatically when a request matches its description. Invoke it explicitly with:
-
-```text
-/mapwright
-```
-
-See the official [Claude Code Skills documentation](https://code.claude.com/docs/en/slash-commands) for skill discovery and invocation behavior. If you create a top-level `skills` directory for the first time during an active session, Claude Code may need to be restarted.
-
-Do not copy only `SKILL.md`: the workflow resolves its validators and capture script through `${CLAUDE_SKILL_DIR}`, so the complete Mapwright directory must remain together.
-
-## CLI usage
-
-Run commands from the Mapwright root. Add `--help` to any command for every available option.
-
-### Repetition
+The v0.1 tools in `tools/` are **unchanged and still work**:
 
 ```bash
-python -m tools.repetition_detector examples/courtyard_level.tscn --threshold 5
+python tools/density_analyzer.py examples/courtyard_level.tscn --cell-size 3
 ```
 
-Reports asset counts and usage percentages; flags values above 5%.
+`tests/test_backward_compatibility.py` pins the two implementations together on both example scenes: given matching thresholds, the ported validators reproduce v0.1's numbers exactly — same analyzed props, same positions, same size scores and landmark candidates, same density statistics (imbalance 50.887625 on the courtyard), same occupancy counts (3304 free cells, 2408 blocked). Nothing about v0.1's behaviour was changed by the port.
 
-### Spacing
+Two deliberate differences, both documented above: v0.1 raised an exception on a scene it could not fully measure, where v0.2 reports what it can and says what it could not; and v0.2's default minimum path width comes from the configured player radius rather than a fixed `1.0`.
+
+`tools/` is deprecated and will be removed in v0.3. Prefer `mapwright analyze`.
+
+## Development
 
 ```bash
-python -m tools.spacing_analyzer examples/courtyard_level.tscn --threshold 1.5
+pip install -e ".[dev]"
+python -m pytest tests/ -q        # 112 tests
 ```
 
-Reports prop centers closer than 1.5 Godot units.
+The suite covers Scene IR round-tripping and validation, the exact distance transform against brute force, route-graph topology, adapter detection and surgical export, every analyzer, scoring, correction application, v0.1 parity, and the full analyze → correct → re-analyze loop.
 
-### Density
+## License
 
-```bash
-python -m tools.density_analyzer examples/courtyard_level.tscn --cell-size 3 --imbalance-threshold 55
-```
-
-Prints a ground-based ASCII heatmap and regional imbalance metrics.
-
-### Landmark
-
-```bash
-python -m tools.landmark_analyzer examples/courtyard_level.tscn --candidate-ratio 1.15 --hierarchy-factor 1.5
-```
-
-Estimates relative size hierarchy and competing landmark candidates.
-
-### Navigation
-
-```bash
-python -m tools.navigation_analyzer examples/courtyard_level.tscn --minimum-path-width 1 --cell-size 0.25 --minimum-region-area 1
-```
-
-Prints an occupancy map, connected regions, and the number of approachable props.
-
-### Sightline
-
-```bash
-python -m tools.sightline_analyzer examples/courtyard_level.tscn --eye-height 1.6 --target-height-ratio 0.6 --test-point-count 5
-```
-
-Reports clear and blocked rays from automatically selected test points to landmark AABBs. Repeat `--point X,Y,Z` to provide exact viewpoints.
-
-## Three-view capture
-
-Godot 4's `--headless` display driver uses a dummy renderer, so Mapwright does **not** use `--headless` for 3D capture. The script does not require a visible application window, but it does require a real display server and rendering context. It exits with an error instead of producing black PNGs when a dummy/headless environment is detected.
-
-### Windows · OpenGL Compatibility
-
-```powershell
-godot --path . --display-driver windows --rendering-method gl_compatibility --rendering-driver opengl3 --audio-driver Dummy --resolution 1x1 --position=-10000,-10000 --script godot/capture.gd -- examples/courtyard_level.tscn captures/courtyard
-```
-
-### Display-less Linux/CI · Xvfb
-
-```bash
-xvfb-run -a -s "-screen 0 1280x1024x24" godot --path . --display-driver x11 --rendering-method gl_compatibility --rendering-driver opengl3 --audio-driver Dummy --script godot/capture.gd -- examples/courtyard_level.tscn captures/courtyard
-```
-
-Both commands produce `top_down.png`, `iso_ne.png`, and `iso_sw.png`.
-
-- GPU acceleration requires a suitable driver and, in containers, potentially access to devices such as `/dev/dri`.
-- GPU-less Linux runners can use an external software OpenGL implementation such as Mesa `llvmpipe`, but it is slower; Godot has no built-in software renderer.
-- Projects that depend on Forward+ features may not render correctly through Compatibility without suitable Vulkan, D3D12, or Metal support.
-- Capture may fail in Windows service/session 0, minimal containers, or runners that cannot create a graphics context. Use Xvfb, GPU passthrough, or a graphics-enabled runner as appropriate.
-
-See Godot's [command-line tutorial](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html) and [`NavigationMesh` reference](https://docs.godotengine.org/en/stable/classes/class_navigationmesh.html) for the upstream behaviors behind these constraints.
-
-## Tests
-
-```bash
-python -B -m unittest discover -s tests -v
-```
-
-The v0.1 tree contains **12 tests** covering the config loader and all six validators.
-
-## Repository structure
-
-```text
-Mapwright/
-├── SKILL.md                       # Claude Code level-design pipeline
-├── README.md
-├── LICENSE                        # MIT
-├── requirements.txt               # Python dependencies
-├── mapwright.config.example.yaml  # Local path and capture configuration
-├── tools/                         # Config loader + six validator CLIs/modules
-├── godot/capture.gd               # Three-view Godot 4 capture script
-├── docs/badges/                   # Repository-local status badges
-├── examples/                      # Example levels and test asset pack
-├── captures/                      # Generated PNGs; verified case study is retained
-└── tests/                         # Python unit tests
-```
-
-## Known limitations and roadmap
-
-Mapwright v0.1 does not provide ChatGPT skill packaging or Unity/Unreal support. Those may be evaluated later, but they are not promised roadmap items.
-
-Released under the MIT License. See [`LICENSE`](LICENSE).
+MIT — see [LICENSE](LICENSE).

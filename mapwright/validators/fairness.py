@@ -202,6 +202,7 @@ def validate_fairness(context: AnalysisContext) -> FairnessReport:
     if len(teams) < 2:
         return _skip(
             collector,
+            context.config,
             teams,
             evidence=(
                 f"The scene declares {len(scene.spawn_points)} spawn point(s) "
@@ -219,6 +220,7 @@ def validate_fairness(context: AnalysisContext) -> FairnessReport:
     if graph is None or grid is None:
         return _skip(
             collector,
+            context.config,
             teams,
             evidence=(
                 f"Teams {', '.join(teams)} are declared, but no route graph could "
@@ -237,6 +239,7 @@ def validate_fairness(context: AnalysisContext) -> FairnessReport:
     if not objectives:
         return _skip(
             collector,
+            context.config,
             teams,
             evidence=(
                 f"Teams {', '.join(teams)} are declared, but the scene declares no "
@@ -250,6 +253,7 @@ def validate_fairness(context: AnalysisContext) -> FairnessReport:
     if len(spawns) < 2:
         return _skip(
             collector,
+            context.config,
             teams,
             evidence=(
                 f"Only {len(spawns)} of {len(teams)} team(s) have a spawn on "
