@@ -16,7 +16,6 @@ from typing import Sequence
 
 from mapwright.adapters.base import CaptureAdapter, CaptureResult
 from mapwright.core.config import MapwrightConfig
-from mapwright.core.scene_ir import SceneIR
 
 
 DEFAULT_TIMEOUT_SECONDS = 300

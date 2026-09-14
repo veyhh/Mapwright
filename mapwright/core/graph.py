@@ -13,7 +13,7 @@ import math
 from collections import deque
 from dataclasses import dataclass, replace
 from enum import Enum
-from typing import Iterable, Mapping, Sequence
+from typing import Sequence
 
 from mapwright.core.geometry import Vec3
 from mapwright.core.metrics import OccupancyGrid, measure_passage_width
