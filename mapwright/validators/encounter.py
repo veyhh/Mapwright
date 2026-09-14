@@ -62,6 +62,8 @@ def validate_encounter(context: AnalysisContext) -> EncounterReport:
         graph.nodes_of_kind(NodeKind.ENTRY, NodeKind.SPAWN)
     )
     for space in analysis.zones:
+        if not _measured(space):
+            continue
         if routed:
             _check_entrances(collector, context, space, advisory)
             _check_flanking(collector, context, space, advisory)
@@ -71,6 +73,16 @@ def validate_encounter(context: AnalysisContext) -> EncounterReport:
         _check_high_ground(collector, context, space)
         _check_cover(collector, context, space)
     return EncounterReport(issues=collector.result(), analysis=analysis)
+
+
+def _measured(space: EncounterSpace) -> bool:
+    """Return whether the zone had a footprint to measure at all.
+
+    A zone with no declared bounds and no measured contents has an engagement
+    distance of zero. Saying such a space lacks cover or height would be a
+    verdict with no evidence behind it, so it is left unjudged.
+    """
+    return space.engagement_distance > 0.0
 
 
 def format_report(report: EncounterReport) -> str:
@@ -89,7 +101,7 @@ def format_report(report: EncounterReport) -> str:
         lines.append("")
         lines.append(issue.to_text())
         if issue.advisory:
-            lines.append("(advisory: measured from an inferred topology)")
+            lines.append("(advisory finding)")
     return "\n".join(lines)
 
 
@@ -112,24 +124,34 @@ def _check_entrances(
     minimum = context.config.thresholds.minimum_encounter_entrances
     if space.entrances >= minimum:
         return
+    lone = space.entrances <= 1
     collector.add(
         "single_entrance_encounter",
         context.config.severity_for("single_entrance_encounter", Severity.WARNING),
-        f"{space.zone} can only be entered one way",
+        f"{space.zone} can only be entered one way"
+        if lone
+        else f"{space.zone} has too few ways in",
         _evidence(
             f"{space.zone} has {space.entrances} route(s) crossing its "
             f"boundary, below the {minimum:.0f} this profile expects for a "
-            f"combat space. The only approach is via {_approaches(space)}, "
-            f"across {space.engagement_distance:.1f} m of engagement space.",
+            f"combat space. "
+            + (
+                f"The only approach is via {_approaches(space)}"
+                if lone
+                else f"The approaches are {_approaches(space)}"
+            )
+            + f", across {space.engagement_distance:.1f} m of engagement "
+            "space.",
             advisory,
         ),
         f"Cut a second way into {space.zone} — a side door, a balcony, a "
         "breakable wall, or a drop from above — so the player can choose how "
         "to open the fight and is not trapped once it starts.",
         explanation=(
-            "One entrance means one plan. The defender knows where the fight "
-            "starts, the attacker has no approach to choose, and a player who "
-            "is losing has the same door to leave by that reinforcements use."
+            "Too few ways in means one plan. The defender knows where the "
+            "fight starts, the attacker has no approach to choose, and a "
+            "player who is losing leaves by the door reinforcements arrive "
+            "through."
         ),
         zone=space.zone,
         metrics=(
@@ -155,11 +177,11 @@ def _check_flanking(
         context.config.severity_for("no_flank_route", Severity.WARNING),
         f"{space.zone} cannot be flanked",
         _evidence(
-            f"{space.zone} offers {space.flank_routes} independent approach "
-            f"beyond the direct one, below the {minimum:.0f} this profile "
-            f"expects. Every route from the nearest entry or spawn shares a "
-            f"segment with the shortest one; the zone has {space.entrances} "
-            "boundary crossing(s) in total.",
+            f"Measured from the nearest entry or spawn, {space.zone} has "
+            f"{space.flank_routes} route(s) that reach it without sharing a "
+            f"segment with the shortest approach, below the {minimum:.0f} "
+            f"this profile expects; the zone has {space.entrances} boundary "
+            "crossing(s) in total.",
             advisory,
         ),
         f"Add a route to {space.zone} that shares no segment with the main "
@@ -194,10 +216,11 @@ def _check_frontal(
         return
     if crowded:
         measurement = (
-            f"{space.zone} has {space.entrances} ways in, but they arrive "
-            f"within {space.approach_spread:.0f} degrees of each other "
-            f"(under {FRONTAL_APPROACH_SPREAD:.0f}), all from the same side: "
-            f"{_approaches(space)}."
+            f"{space.zone} has {space.entrances} ways in, but they all arrive "
+            f"from one side: their approach directions span "
+            f"{space.approach_spread:.0f} of the "
+            f"{FRONTAL_APPROACH_SPREAD:.0f} degrees this profile treats as a "
+            f"real second angle, coming from {_approaches(space)}."
         )
     else:
         measurement = (

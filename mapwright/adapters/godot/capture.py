@@ -86,7 +86,10 @@ class GodotCaptureAdapter(CaptureAdapter):
         project = _project(config)
         destination.mkdir(parents=True, exist_ok=True)
         command, notes = _build_command(
-            str(executable), str(project), Path(scene_path).expanduser().resolve(), destination
+            str(executable),
+            str(project),
+            Path(scene_path).expanduser().resolve(),
+            destination,
         )
         try:
             completed = subprocess.run(

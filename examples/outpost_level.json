@@ -108,11 +108,11 @@
       ]
     },
     {
-      "id": "wall_inner_n",
-      "name": "InnerWallNorth",
+      "id": "ridge_north",
+      "name": "RidgeNorth",
       "type": "structure",
       "position": [
-        0.0,
+        4.0,
         0.0,
         8.5
       ],
@@ -128,13 +128,13 @@
       ],
       "bounds": {
         "min": [
-          -0.25,
+          -4.0,
           0.0,
           -6.5
         ],
         "max": [
-          0.25,
           4.0,
+          6.0,
           6.5
         ]
       },
@@ -143,11 +143,11 @@
       ]
     },
     {
-      "id": "wall_inner_s",
-      "name": "InnerWallSouth",
+      "id": "ridge_south",
+      "name": "RidgeSouth",
       "type": "structure",
       "position": [
-        0.0,
+        4.0,
         0.0,
         -8.5
       ],
@@ -163,155 +163,13 @@
       ],
       "bounds": {
         "min": [
-          -0.25,
-          0.0,
-          -6.5
-        ],
-        "max": [
-          0.25,
-          4.0,
-          6.5
-        ]
-      },
-      "tags": [
-        "wall"
-      ]
-    },
-    {
-      "id": "tunnel_side_n",
-      "name": "TunnelSideNorth",
-      "type": "structure",
-      "position": [
-        4.0,
-        0.0,
-        2.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "scale": [
-        1.0,
-        1.0,
-        1.0
-      ],
-      "bounds": {
-        "min": [
           -4.0,
           0.0,
-          -0.25
-        ],
-        "max": [
-          4.0,
-          4.0,
-          0.25
-        ]
-      },
-      "tags": [
-        "wall"
-      ],
-      "zone": "tunnel"
-    },
-    {
-      "id": "tunnel_side_s",
-      "name": "TunnelSideSouth",
-      "type": "structure",
-      "position": [
-        4.0,
-        0.0,
-        -2.0
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "scale": [
-        1.0,
-        1.0,
-        1.0
-      ],
-      "bounds": {
-        "min": [
-          -4.0,
-          0.0,
-          -0.25
-        ],
-        "max": [
-          4.0,
-          4.0,
-          0.25
-        ]
-      },
-      "tags": [
-        "wall"
-      ],
-      "zone": "tunnel"
-    },
-    {
-      "id": "wall_arena_n",
-      "name": "ArenaWallNorth",
-      "type": "structure",
-      "position": [
-        8.0,
-        0.0,
-        8.5
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "scale": [
-        1.0,
-        1.0,
-        1.0
-      ],
-      "bounds": {
-        "min": [
-          -0.25,
-          0.0,
           -6.5
         ],
         "max": [
-          0.25,
           4.0,
-          6.5
-        ]
-      },
-      "tags": [
-        "wall"
-      ]
-    },
-    {
-      "id": "wall_arena_s",
-      "name": "ArenaWallSouth",
-      "type": "structure",
-      "position": [
-        8.0,
-        0.0,
-        -8.5
-      ],
-      "rotation": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "scale": [
-        1.0,
-        1.0,
-        1.0
-      ],
-      "bounds": {
-        "min": [
-          -0.25,
-          0.0,
-          -6.5
-        ],
-        "max": [
-          0.25,
-          4.0,
+          6.0,
           6.5
         ]
       },

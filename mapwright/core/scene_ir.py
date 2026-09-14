@@ -195,13 +195,29 @@ class SceneObject:
         return world_aabb(self.bounds, self.position, self.basis)
 
     def world_size(self) -> Vec3:
-        """Return the world-space dimensions, or zero when unmeasured."""
+        """Return the axis-aligned space this object occupies, orientation included."""
         box = self.world_bounds()
         return box.size if box is not None else Vec3.zero()
 
+    def intrinsic_size(self) -> Vec3:
+        """Return the object's own scaled dimensions, ignoring orientation.
+
+        Distinct from :meth:`world_size` on purpose: rotating a tree by 45°
+        widens its axis-aligned box but does not make the tree bigger. Size
+        hierarchy reads this; clearance and occlusion read the world box.
+        """
+        if self.bounds is None:
+            return Vec3.zero()
+        size = self.bounds.size
+        return Vec3(
+            abs(size.x * self.scale.x),
+            abs(size.y * self.scale.y),
+            abs(size.z * self.scale.z),
+        )
+
     def size_score(self) -> float:
-        """Return the world AABB diagonal used as the landmark size heuristic."""
-        return self.world_size().length()
+        """Return the diagonal of the intrinsic size, the landmark heuristic."""
+        return self.intrinsic_size().length()
 
     def source_value(self, key: str) -> str | None:
         """Return one engine-specific provenance value, when present."""

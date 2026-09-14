@@ -112,6 +112,12 @@ _MARKER_PATTERNS: tuple[tuple[MarkerKind, re.Pattern[str]], ...] = tuple(
     for kind, tokens in _MARKER_NAME_TOKENS
 )
 _MARKER_NODE_TYPES = frozenset({"Marker3D", "Node3D"})
+#: Words that can follow "team" in a name while naming a role, not a team, so
+#: "BlueTeamStart" reads as team "blue" rather than team "start".
+_ROLE_TOKENS = frozenset(
+    {token for _, tokens in _MARKER_NAME_TOKENS for token in tokens}
+    | {"marker", "node", "point", "position"}
+)
 
 _VISUAL_GEOMETRY_TYPES = frozenset(
     {
@@ -298,6 +304,7 @@ class GodotImporter(SceneImporter):
 
 
 def _build_scene(parsed: ParsedScene, scene_path: Path, project_root: Path) -> SceneIR:
+    """Turn parsed nodes into props, ground, and markers, in document order."""
     primitives = parsed.primitive_map()
     cache: dict[Path, Vec3 | None] = {}
     objects: list[SceneObject] = []
@@ -412,8 +419,9 @@ def _marker_point(node: GodotNode) -> MarkerPoint | None:
 
 
 def _team(normalized_name: str) -> str | None:
+    """Return the team a marker name declares, by ``team_*`` token or colour."""
     match = _TEAM_PATTERN.search(normalized_name)
-    if match is not None:
+    if match is not None and match.group(1) not in _ROLE_TOKENS:
         return match.group(1)
     color = _TEAM_COLOR_PATTERN.search(normalized_name)
     return color.group(1) if color is not None else None
@@ -543,7 +551,8 @@ def _primitive_dimensions(resource_type: str, properties: str) -> Vec3 | None:
             _float_property(properties, "top_radius", 0.5),
             _float_property(properties, "bottom_radius", 0.5),
         )
-        return Vec3(radius * 2.0, _float_property(properties, "height", 2.0), radius * 2.0)
+        height = _float_property(properties, "height", 2.0)
+        return Vec3(radius * 2.0, height, radius * 2.0)
     if resource_type == "SphereMesh":
         radius = _float_property(properties, "radius", 0.5)
         height = _float_property(properties, "height", radius * 2.0)
@@ -556,7 +565,8 @@ def _csg_dimensions(node_type: str, properties: str) -> Vec3 | None:
         return _vector3_property(properties, "size") or Vec3(2.0, 2.0, 2.0)
     if node_type == "CSGCylinder3D":
         radius = _float_property(properties, "radius", 1.0)
-        return Vec3(radius * 2.0, _float_property(properties, "height", 2.0), radius * 2.0)
+        height = _float_property(properties, "height", 2.0)
+        return Vec3(radius * 2.0, height, radius * 2.0)
     if node_type == "CSGSphere3D":
         radius = _float_property(properties, "radius", 1.0)
         return Vec3(radius * 2.0, radius * 2.0, radius * 2.0)

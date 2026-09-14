@@ -92,7 +92,8 @@ class LandmarkVisibility:
             "tested_from": self.tested_from,
             "visibility_percentage": self.visibility_percentage,
             "blockers": [
-                {"object": identifier, "rays": count} for identifier, count in self.blockers
+                {"object": identifier, "rays": count}
+                for identifier, count in self.blockers
             ],
             "flagged": self.flagged,
         }
@@ -397,7 +398,9 @@ def _automatic_viewpoints(
     if not anchors:
         anchors = _named_anchors(context.scene.objects)
     center = grid.bounds.center
-    anchors = anchors + (("center", Vec3(center.x, eye_y, center.z), "ground centre fallback"),)
+    anchors = anchors + (
+        ("center", Vec3(center.x, eye_y, center.z), "ground centre fallback"),
+    )
 
     selected: list[Viewpoint] = []
     used: set[tuple[int, int]] = set()
@@ -445,7 +448,10 @@ def _marker_anchors(
     markers: Sequence[MarkerPoint], source: str
 ) -> tuple[tuple[str, Vec3, str], ...]:
     """Return anchors for declared points of interest."""
-    return tuple((f"{marker.kind.value}:{marker.label}", marker.position, source) for marker in markers)
+    return tuple(
+        (f"{marker.kind.value}:{marker.label}", marker.position, source)
+        for marker in markers
+    )
 
 
 def _named_anchors(
@@ -466,7 +472,13 @@ def _named_anchors(
         (obj for obj in objects if _ENTRANCE_NAME.search(_normalize(obj.name))), None
     )
     if entrance is not None:
-        return ((f"entrance:{entrance.name}", entrance.position, "named entrance fallback"),)
+        return (
+            (
+                f"entrance:{entrance.name}",
+                entrance.position,
+                "named entrance fallback",
+            ),
+        )
     return ()
 
 
@@ -486,8 +498,8 @@ def _unavailable(
         "Landmark visibility was not measured",
         evidence=(
             f"Sightline analysis needs walkable ground and measurable landmarks, "
-            f"but {reason}; {len(context.scene.props)} placed object(s) went "
-            "untested."
+            f"but {reason.rstrip('.')}; "
+            f"{_plural(len(context.scene.props), 'placed object')} went untested."
         ),
         explanation=(
             "Visibility is measured from the places a player can stand, so "
@@ -512,6 +524,11 @@ def _unavailable(
         visibility=(),
         sightlines=(),
     )
+
+
+def _plural(count: int, singular: str) -> str:
+    """Return a count and its noun, pluralized with a trailing 's'."""
+    return f"{count} {singular}" if count == 1 else f"{count} {singular}s"
 
 
 def _render_table(headers: tuple[str, ...], rows: Sequence[tuple[str, ...]]) -> list[str]:

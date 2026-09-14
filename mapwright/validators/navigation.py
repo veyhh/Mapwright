@@ -16,6 +16,7 @@ from mapwright.core.context import AnalysisContext
 from mapwright.core.geometry import Bounds, Vec3
 from mapwright.core.issues import Category, Issue, IssueCollector, Severity
 from mapwright.core.metrics import (
+    Footprint,
     GridError,
     OccupancyGrid,
     Region,
@@ -307,36 +308,87 @@ def _approaches(
     main_component_id: int | None,
 ) -> tuple[ObjectApproach, ...]:
     """Return the nearest free-space component to each obstacle."""
-    free_cells = [
-        (component_id, grid.cell_center(column, row))
-        for row, label_row in enumerate(labels)
-        for column, component_id in enumerate(label_row)
-        if component_id >= 0
-    ]
     approaches: list[ObjectApproach] = []
     for footprint in grid.footprints:
-        if not free_cells:
-            approaches.append(
-                ObjectApproach(footprint.object_id, footprint.name, None, None, False)
-            )
-            continue
-        best_distance = math.inf
-        best_component = free_cells[0][0]
-        for component_id, center in free_cells:
-            distance = footprint.distance_to(center.x, center.z)
-            if distance < best_distance:
-                best_distance = distance
-                best_component = component_id
+        component_id, distance = _nearest_free_cell(grid, labels, footprint)
         approaches.append(
             ObjectApproach(
                 object_id=footprint.object_id,
                 name=footprint.name,
-                component_id=best_component,
-                distance=best_distance,
-                in_main_region=best_component == main_component_id,
+                component_id=component_id,
+                distance=distance,
+                in_main_region=(
+                    component_id is not None and component_id == main_component_id
+                ),
             )
         )
     return tuple(sorted(approaches, key=lambda item: item.object_id))
+
+
+def _nearest_free_cell(
+    grid: OccupancyGrid, labels: Sequence[Sequence[int]], footprint: Footprint
+) -> tuple[int | None, float | None]:
+    """Return the closest free cell to one footprint, and how far away it is.
+
+    The search widens a window around the footprint instead of scanning the
+    whole grid: once a free cell is found no further away than the window
+    reaches, nothing outside the window can be closer, so the answer is exact
+    while staying local on large levels.
+    """
+    span = math.hypot(grid.columns * grid.cell_width, grid.rows * grid.cell_depth)
+    reach = max(grid.cell_width, grid.cell_depth) * 2.0
+    while True:
+        exhaustive = reach >= span
+        window = (
+            (0, grid.columns - 1, 0, grid.rows - 1)
+            if exhaustive
+            else _window(grid, footprint, reach)
+        )
+        component_id, distance = _closest_in_window(grid, labels, footprint, window)
+        if component_id is not None and (exhaustive or distance <= reach):
+            return component_id, distance
+        if exhaustive:
+            return None, None
+        reach = min(reach * 2.0, span)
+
+
+def _closest_in_window(
+    grid: OccupancyGrid,
+    labels: Sequence[Sequence[int]],
+    footprint: Footprint,
+    window: tuple[int, int, int, int],
+) -> tuple[int | None, float]:
+    """Return the closest free cell inside one cell range."""
+    first_column, last_column, first_row, last_row = window
+    best_distance = math.inf
+    best_component: int | None = None
+    for row in range(first_row, last_row + 1):
+        for column in range(first_column, last_column + 1):
+            component_id = labels[row][column]
+            if component_id < 0:
+                continue
+            center = grid.cell_center(column, row)
+            distance = footprint.distance_to(center.x, center.z)
+            if distance < best_distance:
+                best_distance = distance
+                best_component = component_id
+    return best_component, best_distance
+
+
+def _window(
+    grid: OccupancyGrid, footprint: Footprint, reach: float
+) -> tuple[int, int, int, int]:
+    """Return the grid cell range covering a footprint grown by one reach."""
+    low_x = footprint.center_x - footprint.half_width - reach
+    high_x = footprint.center_x + footprint.half_width + reach
+    low_z = footprint.center_z - footprint.half_depth - reach
+    high_z = footprint.center_z + footprint.half_depth + reach
+    return (
+        max(0, math.floor((low_x - grid.origin_x) / grid.cell_width)),
+        min(grid.columns - 1, math.ceil((high_x - grid.origin_x) / grid.cell_width)),
+        max(0, math.floor((low_z - grid.origin_z) / grid.cell_depth)),
+        min(grid.rows - 1, math.ceil((high_z - grid.origin_z) / grid.cell_depth)),
+    )
 
 
 def _clearance_sensitivity(
@@ -401,9 +453,10 @@ def _issues(
                 f"{report.free_cell_count} of "
                 f"{report.free_cell_count + report.blocked_cell_count} grid cells "
                 f"are free ({report.free_area:.2f} m2 in "
-                f"{len(report.regions)} pocket(s), largest {largest:.2f} m2) over a "
+                f"{_plural(len(report.regions), 'pocket')}, largest "
+                f"{largest:.2f} m2) over a "
                 f"{ground.width:.1f} x {ground.depth:.1f} m area with "
-                f"{len(report.approaches)} obstacle(s)."
+                f"{_plural(len(report.approaches), 'obstacle')}."
             ),
             explanation=(
                 "A body "
@@ -536,9 +589,10 @@ def _unavailable(context: AnalysisContext) -> NavigationReport:
         context.config.severity_for("navigation_unavailable", Severity.INFO),
         "Navigability was not measured",
         evidence=(
-            f"No walkability grid could be built for this scene: {reason}. "
-            f"{len(context.scene.props)} placed object(s) and "
-            f"{len(context.scene.all_markers)} marker(s) went untested."
+            f"No walkability grid could be built for this scene: "
+            f"{reason.rstrip('.')}. "
+            f"{_plural(len(context.scene.props), 'placed object')} and "
+            f"{_plural(len(context.scene.all_markers), 'marker')} went untested."
         ),
         explanation=(
             "Connectivity is measured against the playable area; with no such "
@@ -576,6 +630,11 @@ def _unavailable(context: AnalysisContext) -> NavigationReport:
         clearance_sensitive=False,
         clearance_tested=False,
     )
+
+
+def _plural(count: int, singular: str) -> str:
+    """Return a count and its noun, pluralized with a trailing 's'."""
+    return f"{count} {singular}" if count == 1 else f"{count} {singular}s"
 
 
 def _findings(issues: Sequence[Issue]) -> list[str]:

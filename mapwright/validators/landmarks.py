@@ -226,7 +226,9 @@ def format_report(report: LandmarkReport) -> str:
     )
     if report.unmeasured:
         lines.extend(["", "Unmeasured objects:"])
-        lines.extend(f"- {item.name} ({item.id}): {item.reason}" for item in report.unmeasured)
+        lines.extend(
+            f"- {item.name} ({item.id}): {item.reason}" for item in report.unmeasured
+        )
     lines.extend(_findings(report.issues))
     return "\n".join(lines)
 

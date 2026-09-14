@@ -30,6 +30,11 @@ REGION_TARGET_SPAN = 30.0
 #: Most regions per axis, so a large map stays reportable.
 MAXIMUM_REGION_SPLIT = 3
 
+#: Emptiness is counted over patches this many density cells across. A patch
+#: the size of one prop is empty on any map; a patch several strides wide with
+#: nothing in it is dead ground.
+EMPTY_PATCH_CELLS = 3
+
 _COLUMN_LABELS = {1: ("",), 2: ("west", "east"), 3: ("west", "center", "east")}
 _ROW_LABELS = {1: ("",), 2: ("south", "north"), 3: ("south", "center", "north")}
 
@@ -134,11 +139,12 @@ def analyze_readability(context: AnalysisContext) -> ReadabilityAnalysis:
     """Measure silhouette, clutter, emptiness, and landmark strength per region."""
     scene = context.scene
     player = context.config.player
+    thresholds = context.config.thresholds
     footprint = math.pi * player.radius**2
-    cell_size = max(context.config.thresholds.density_cell_size, player.diameter)
+    cell_size = max(EMPTY_PATCH_CELLS * thresholds.density_cell_size, player.diameter)
     grid = context.grid
 
-    tall_height = context.config.thresholds.cover_height_max
+    tall_height = thresholds.cover_height_max
 
     if scene.zones:
         regions = tuple(

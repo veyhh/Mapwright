@@ -12,12 +12,11 @@ side always means the same thing as the side of the rendered view.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Sequence
+from typing import Any, Callable
 
 from mapwright.core.context import AnalysisContext
-from mapwright.core.geometry import Bounds, Vec3
+from mapwright.core.geometry import Bounds
 from mapwright.core.metrics import Distribution
-from mapwright.core.scene_ir import SceneObject
 
 EAST = "east"
 WEST = "west"

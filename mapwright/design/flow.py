@@ -336,7 +336,7 @@ def _chokepoints(
         structural = False
         if edge.key in bridges:
             near, far = _sides(graph, edge)
-            if _side_is_substantial(graph, near) and _side_is_substantial(graph, far):
+            if _side_is_substantial(near) and _side_is_substantial(far):
                 structural = True
                 split = (len(near), len(far))
         narrow = edge.width < width_limit
@@ -376,15 +376,15 @@ def _sides(graph: RouteGraph, edge: RouteEdge) -> tuple[frozenset[str], frozense
     return reachable(edge.source), reachable(edge.target)
 
 
-def _side_is_substantial(graph: RouteGraph, side: frozenset[str]) -> bool:
-    """Return whether one side of a cut is substantial enough to matter.
+def _side_is_substantial(side: frozenset[str]) -> bool:
+    """Return whether one side of a cut is a part of the level, not a terminus.
 
-    A side holding a single sampled waypoint is an artefact of how the graph
-    was derived, not a part of the level a player would notice losing.
+    A cut that isolates a single node is how every entry, exit, and objective
+    attaches to the graph; calling each of those a chokepoint buries the one
+    cut that really does split the level. A terminus reachable by only one
+    route is still reported — as route diversity, where it belongs.
     """
-    if len(side) >= 2:
-        return True
-    return any(graph.node(identifier).is_semantic for identifier in side)
+    return len(side) >= 2
 
 
 def _backtracking_ratio(

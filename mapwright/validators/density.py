@@ -252,7 +252,7 @@ def format_report(report: DensityReport) -> str:
         ),
         (
             f"Densest cells: {', '.join(cell.label for cell in report.densest_cells)} "
-            f"({densest_count} props)"
+            f"({_plural(densest_count, 'prop')})"
         ),
         f"Densest cell share: {report.densest_share * 100:.2f}%",
         (
@@ -298,8 +298,16 @@ def _with_issues(context: AnalysisContext, report: DensityReport) -> DensityRepo
                 "individual placements."
             ),
             recommendation=(
-                f"Redistribute {move} {'prop' if move == 1 else 'props'} from cell "
-                f"{densest.label} into {targets}."
+                (
+                    f"No cell holds more than {_plural(densest_count, 'prop')}, so "
+                    f"the score comes from empty ground rather than crowding: add "
+                    f"content across {targets}, or reduce the playable area."
+                )
+                if densest_count <= 1
+                else (
+                    f"Redistribute {_plural(move, 'prop')} from cell "
+                    f"{densest.label} into {targets}."
+                )
             ),
             metrics=(
                 ("imbalance", report.imbalance),
@@ -394,7 +402,7 @@ def _unavailable(context: AnalysisContext, ground: Bounds | None) -> DensityRepo
         "Density was not measured",
         evidence=(
             f"Density analysis needs a playable area, but {reason}; "
-            f"{len(context.scene.props)} placed object(s) went uncounted."
+            f"{_plural(len(context.scene.props), 'placed object')} went uncounted."
         ),
         explanation=(
             "Without a ground extent there is no denominator for distribution: "
@@ -436,6 +444,11 @@ def _cell_index(value: float, minimum: float, maximum: float, count: int) -> int
         return count - 1
     normalized = (value - minimum) / (maximum - minimum)
     return min(max(int(normalized * count), 0), count - 1)
+
+
+def _plural(count: int, singular: str) -> str:
+    """Return a count and its noun, pluralized with a trailing 's'."""
+    return f"{count} {singular}" if count == 1 else f"{count} {singular}s"
 
 
 def _heat_character(count: int) -> str:

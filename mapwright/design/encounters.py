@@ -250,14 +250,18 @@ def _onward_exits(
 def _retreat_routes(
     graph: RouteGraph | None, bounds: Bounds | None, crossings: Sequence[RouteEdge]
 ) -> int:
-    """Return how many ways out lead back toward an entry or spawn."""
+    """Return how many ways out lead back toward an entry or spawn.
+
+    A zone that contains an entry or spawn needs no route back to one: the
+    player's own ground is inside the encounter, so every way out of it counts
+    as a way to disengage.
+    """
     if graph is None or bounds is None:
         return 0
-    targets = {
-        node.id
-        for node in graph.nodes_of_kind(NodeKind.ENTRY, NodeKind.SPAWN)
-        if not _inside(bounds, node)
-    }
+    starts = graph.nodes_of_kind(NodeKind.ENTRY, NodeKind.SPAWN)
+    if any(_inside(bounds, node) for node in starts):
+        return len(crossings)
+    targets = {node.id for node in starts if not _inside(bounds, node)}
     return sum(
         1
         for edge in crossings

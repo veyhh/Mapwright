@@ -209,11 +209,9 @@ def plan_corrections(
     corrections: list[Correction] = []
     skipped: list[tuple[str, str]] = []
     touched: set[str] = set()
+    applied_count = 0
 
     for issue in issues:
-        if len(corrections) >= limit:
-            skipped.append((issue.code, "correction limit reached for this pass"))
-            continue
         if issue.code in STRUCTURAL_CODES:
             corrections.append(
                 Correction(
@@ -234,6 +232,11 @@ def plan_corrections(
             continue
         if issue.code not in AUTOMATIC_CODES:
             continue
+        # Only edits Mapwright applies itself are budgeted; proposing design
+        # work costs nothing and is most of the value of a pass.
+        if applied_count >= limit:
+            skipped.append((issue.code, "correction limit reached for this pass"))
+            continue
 
         planned, scene = _plan_geometric(context, scene, issue, touched)
         if planned is None:
@@ -242,6 +245,7 @@ def plan_corrections(
             )
             continue
         corrections.append(planned)
+        applied_count += 1
         if planned.object_id is not None:
             touched.add(planned.object_id)
 
@@ -336,13 +340,14 @@ def _plan_separation(
     )
     if mover.id in touched:
         mover, anchor = anchor, mover
-    required = _required_separation(context, mover, anchor)
     direction = Vec3(
         mover.position.x - anchor.position.x, 0.0, mover.position.z - anchor.position.z
     )
     if direction.length() < 1e-6:
         direction = Vec3(1.0, 0.0, 0.0)
-    preferred = anchor.position + direction.normalized() * required
+    direction = direction.normalized()
+    required = _required_separation(context, mover, anchor, direction)
+    preferred = anchor.position + direction * required
     preferred = Vec3(preferred.x, mover.position.y, preferred.z)
     position = _find_safe_position(context, scene, mover, preferred)
     if position is None:
@@ -463,15 +468,15 @@ def _plan_substitution(
     scene: SceneIR, issue: Issue, asset_provider: AssetProvider | None
 ) -> Correction | None:
     """Propose swapping one instance of an overused asset for a rarer one."""
-    overused = issue.subjects[0] if issue.subjects else None
-    if overused is None:
-        return None
     instances = [
-        obj for obj in scene.props if (obj.asset or obj.name) == overused
+        obj
+        for identifier in issue.subjects
+        if (obj := scene.object_by_id(identifier)) is not None
     ]
     if not instances:
         return None
     mover = sorted(instances, key=lambda obj: obj.id)[-1]
+    overused = mover.asset or mover.name
     requirement = AssetRequirement(
         description=f"an alternative to {mover.name} at a similar scale",
         zone=issue.zone,
@@ -490,26 +495,39 @@ def _plan_substitution(
         rationale=(
             f"breaks up repetition of {mover.name} by varying one instance "
             "rather than deleting placed content"
+            + (f"; nearest in-scene match is {replacement}" if replacement else "")
         ),
         object_id=mover.id,
         requirement=requirement,
         replacement_asset=replacement,
         zone=issue.zone,
-        manual=replacement is None,
+        # Swapping an asset changes what a space means, not just where it
+        # sits. Mapwright can size-match a candidate but cannot tell whether a
+        # barrel reads as cover here, so a person picks the replacement.
+        manual=True,
     )
 
 
 def _required_separation(
-    context: AnalysisContext, mover: SceneObject, anchor: SceneObject
+    context: AnalysisContext,
+    mover: SceneObject,
+    anchor: SceneObject,
+    direction: Vec3,
 ) -> float:
-    """Return the centre distance that clears both footprints and the player."""
+    """Return the centre distance that leaves a player-width gap between two objects.
+
+    Measured along the direction they are being pushed apart, using each box's
+    reach on that axis. Using the full diagonal instead would demand metres of
+    space from anything long: a crate does not need to sit nine metres from a
+    wall to stop crowding it.
+    """
     minimum = context.config.thresholds.minimum_spacing
-    radii = 0.0
+    reach = 0.0
     for obj in (mover, anchor):
         box = obj.world_bounds()
         if box is not None:
-            radii += math.hypot(box.width, box.depth) * 0.5
-    return max(minimum, radii + context.config.player.diameter)
+            reach += abs(direction.x) * box.width * 0.5 + abs(direction.z) * box.depth * 0.5
+    return max(minimum, reach + context.config.player.diameter)
 
 
 def _find_safe_position(

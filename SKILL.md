@@ -1,135 +1,201 @@
 ---
 name: mapwright
-description: Plan, build, and iteratively validate 3D levels in Godot 4.x. Use for level design, environment layout, prop placement, scene dressing, gameplay-space composition, or revising a Godot 3D scene without random asset scattering.
+description: Engine-agnostic level design director. Use when planning, building, evaluating, or improving a playable 3D space in any engine — analysing a level's flow, pacing, encounters, or competitive fairness; diagnosing why a map feels boring, unfair, confusing, or cramped; checking whether an arena is balanced for two teams or whether combat works in a corridor; making a level more readable; finding a scene's level-design problems; or iteratively improving a map. Works on Godot 4.x `.tscn` scenes and on engine-independent Scene IR JSON with no engine installed.
 ---
 
-# Mapwright level design pipeline
+# Mapwright level design director
 
-Use this workflow for every Godot 4.x level-design task. Placement alone is not completion. Validate the scene numerically and visually, correct material issues, and preserve the intended gameplay flow.
+Mapwright measures a playable space, explains what it found, proposes specific
+corrections, and measures again. Placement is not completion, and neither is a
+passing metric: the goal is a space that reads and plays, with every claim
+backed by a number you can check.
 
-## 1. Establish inputs
+Work this loop:
 
-1. Locate the Mapwright root, Godot project root, target `.tscn`, asset pack, capture directory, and Godot executable. Read `mapwright.config.yaml` when present; discover values that are safely discoverable before asking.
-2. Confirm Godot 4.x and a target scene inside the project.
-3. Inspect the asset pack and existing scene conventions before editing. Do not invent resource paths or scatter placeholders unless blockout geometry is requested.
-4. Preserve user-authored content unless replacement is explicitly authorized.
+```
+UNDERSTAND -> PLAN -> BUILD -> MEASURE -> REVIEW -> CORRECT -> REBUILD
+```
 
-## 2. Plan zones and intent
+## 1. Understand the space
 
-Before editing, write a compact plan covering:
+Run `mapwright inspect` first. It reports what Mapwright can see and, more
+importantly, what it cannot measure.
+
+```bash
+mapwright inspect <scene>            # .tscn, .json, or .blend
+mapwright inspect <scene> --export ir.json
+```
+
+Read the coverage block before anything else. A check listed as *not
+applicable* is not a pass — it means the scene never declared what that check
+needs. Objects listed without usable extents are excluded from every spatial
+measurement, so a clean spatial report over half-measured geometry means
+little.
+
+If `mapwright doctor` reports a blocked required check, fix that first.
+
+## 2. Declare intent, not just geometry
+
+Mapwright cannot infer what a space is *for*. Flow, pacing, encounter, and
+fairness analysis all depend on declarations the scene has to carry:
+
+| Declaration | Unlocks | Without it |
+|---|---|---|
+| `zones` with `type` and `pacing` | pacing, encounter | pacing reports `no_zone_intent`; encounter has nothing to analyse |
+| `entry_points`, `objectives`, `exits` | critical path, route diversity | topology is sampled from walkable space and every finding becomes advisory |
+| `spawn_points` with `team` | fairness | fairness stands down |
+
+In a Godot scene, name `Marker3D`/`Node3D` nodes with `spawn`, `entry`,
+`exit`, or `objective` tokens and the importer picks them up. In Scene IR
+JSON, declare them directly. Adding four markers and four zones changes
+Mapwright from a prop checker into a level-design tool — do it before
+concluding a level is fine.
+
+Choose a genre profile too. The same geometry is a defect in one genre and the
+point in another: a forced corridor is bad flow in an exploration map and
+correct in horror.
+
+```bash
+mapwright analyze <scene> --profile horror    # fps, stealth, platformer, moba, exploration
+```
+
+## 3. Plan zones before placing anything
+
+For new work, write a compact plan first:
 
 1. Gameplay or experiential purpose.
-2. Entry, exit, critical route, optional routes, and player flow.
-3. Named zones with one purpose and visual identity each.
-4. Intended primary landmarks and reveal sightlines.
-5. Intended density per zone and required negative space.
-6. Asset families per zone and assets that should remain rare.
+2. Entry, exit, critical route, optional routes.
+3. Named zones with one purpose and one intensity each.
+4. Intended landmarks and the approaches that should reveal them.
+5. Intended density per zone, and the negative space to protect.
+6. Asset families per zone, and which assets stay rare.
 
-Place an asset only when it supports a zone, route, landmark, boundary, gameplay need, or readable environmental story.
+Place an asset only when it serves a zone, route, landmark, boundary,
+gameplay need, or readable environmental story. Work from large-scale
+structure to detail: boundaries and traversable space, then routes and
+sightlines, then structures and landmarks, then cover and obstacles, then
+secondary dressing.
 
-## 3. Place assets systematically
-
-Work from large-scale structure to detail:
-
-1. Block out boundaries, traversable space, and major elevation changes.
-2. Establish routes, negative space, and landmark sightlines.
-3. Place major structures and landmarks.
-4. Place gameplay obstacles, cover, route markers, and boundaries.
-5. Add secondary dressing only after the larger composition reads correctly.
-6. Use deliberate variation without accidental intersections, repeated rows, identical rotations, implausible clearances, or filler scattering.
-7. Save a valid Godot 4 text scene.
-
-When validation finds a problem, **do not default to deleting objects**. First reposition, redistribute, rotate, rescale, or—when repetition count itself is the issue—replace instances with suitable alternatives. Deletion is a last resort for an asset with no remaining design purpose and must be reported. Do not reduce prop count merely to make one metric pass; prior Mapwright runs showed that deletion can leave density and spatial balance unchanged or worse.
-
-## 4. Run the complete validation loop
-
-Run all six validators in the order below, then run visual capture. This order moves from cheap/global inventory checks to geometry-dependent checks: repetition establishes usage, spacing and density establish layout, landmark establishes candidates, navigation consumes measured footprints, and sightline consumes both landmark candidates and navigable viewpoints.
-
-Use consistent thresholds across correction cycles unless the design requirement justifies a documented change.
+## 4. Measure
 
 ```bash
-python "${CLAUDE_SKILL_DIR}/tools/repetition_detector.py" "<scene.tscn>" --threshold 5
-python "${CLAUDE_SKILL_DIR}/tools/spacing_analyzer.py" "<scene.tscn>" --threshold 1.5
-python "${CLAUDE_SKILL_DIR}/tools/density_analyzer.py" "<scene.tscn>" --cell-size 3 --imbalance-threshold 55
-python "${CLAUDE_SKILL_DIR}/tools/landmark_analyzer.py" "<scene.tscn>" --candidate-ratio 1.15 --hierarchy-factor 1.5
-python "${CLAUDE_SKILL_DIR}/tools/navigation_analyzer.py" "<scene.tscn>" --minimum-path-width 1 --cell-size 0.25 --minimum-region-area 1
-python "${CLAUDE_SKILL_DIR}/tools/sightline_analyzer.py" "<scene.tscn>" --eye-height 1.6 --target-height-ratio 0.6 --test-point-count 5
+mapwright analyze <scene>
+mapwright analyze <scene> --section density --section flow   # detail for one analyzer
+mapwright flow <scene>        # or: pacing, encounter, fairness
 ```
 
-### 4A. Interpret numerical evidence
+`analyze` writes `reports/level_report.md` and `reports/level_report.json`,
+and prints the score table with every finding, most severe first.
 
-1. **Repetition:** Review flagged counts and percentages. Decide whether repetition is structural or unjustified. Prefer redistribution or appropriate asset substitution over deletion.
-2. **Spacing:** Inspect every `TOO_CLOSE` pair against asset size and visual evidence. Move one or both objects while preserving zone purpose.
-3. **Density:** Compare the heatmap, empty-cell ratio, variance, and imbalance score with the zone plan. Redistribute props between sparse and crowded cells; do not assume reducing the total count improves distribution.
-4. **Landmark:** Review candidates, competing candidates, and missing hierarchy against the intended landmark plan.
-5. **Navigation:** Treat confirmed disconnected significant regions as actionable unless intentionally inaccessible. Verify routes and prop approaches.
-6. **Sightline:** Review each landmark's clear-ray count and blockers, especially landmarks never visible from any test point.
+What each system measures, and what it cannot:
 
-Landmark and sightline warnings are **review notes, not unconditional correction commands**. These validators measure approximate size and AABB visibility, not semantic importance, central placement, uniqueness, color, lighting, or silhouette. A well may be the intended primary landmark even when trees score larger. Change the scene only when the warning conflicts with the zone plan and capture evidence; otherwise document the intentional exception.
+| System | Measures | Cannot judge |
+|---|---|---|
+| Spatial | asset share, centre distances, grid density, size hierarchy | whether repetition is rhythm or laziness |
+| Navigation | connected walkable space, clearance, reachability | anything the engine's own navmesh would add |
+| Flow | critical path, loops, dead ends, chokepoints, route diversity, traversal concentration | whether a forced route is a mistake or a set piece |
+| Pacing | declared intensity sequence, runs, relief, abrupt transitions | whether the curve suits the story |
+| Encounter | entrances, flanks, high ground, cover spread, retreat, exposure | how enemies actually behave |
+| Fairness | per-team distance, travel time, cover, chokes, high ground | skill, meta, or spawn timing |
+| Visual | mass balance, silhouette variety, clutter, emptiness | what a rendered frame looks like |
 
-A navigation `NARROW / GRID-SENSITIVE BOTTLENECK` warning is also **not proof of disconnection**. Rerun with a finer grid, inspect the ASCII map and capture, and manually evaluate the relevant passage. Treat `DISCONNECTED NAVIGABLE REGIONS` as stronger evidence. Never claim a route is blocked solely from the grid-sensitive warning.
+Findings marked *review note* (`advisory`) measure a proxy, not the design
+property itself. Size is not importance; a geometric mass check is not a look
+at the image; a graph sampled from open space is not the designer's intended
+topology. Weigh them, do not obey them.
 
-### 4B. Capture and inspect visually
+## 5. Review the evidence, then correct
 
-Do not use Godot `--headless` for 3D capture because it selects a dummy renderer. Use a real rendering driver with an off-screen host window, or Xvfb on display-less Linux.
+Classify every finding as actionable, intentional, or review-only. When it is
+intentional, say so and why — an unexplained ignored finding is
+indistinguishable from an unnoticed one.
 
-Windows/OpenGL Compatibility:
-
-```powershell
-godot --path "<godot-project>" `
-  --display-driver windows `
-  --rendering-method gl_compatibility `
-  --rendering-driver opengl3 `
-  --audio-driver Dummy `
-  --resolution 1x1 `
-  --position=-10000,-10000 `
-  --script "${CLAUDE_SKILL_DIR}/godot/capture.gd" -- `
-  "<scene.tscn>" "<capture-output>/iteration-N"
-```
-
-Linux CI:
+Correct by **repositioning, redistributing, rotating, rescaling, or
+substituting**. Do not delete placed content to make a metric pass: v0.1
+showed that deleting props leaves density and composition no better and the
+level poorer. Deletion is a last resort for an asset with no remaining design
+purpose, and must be reported when it happens.
 
 ```bash
-xvfb-run -a -s "-screen 0 1280x1024x24" \
-  godot --path "<godot-project>" \
-  --display-driver x11 \
-  --rendering-method gl_compatibility \
-  --rendering-driver opengl3 \
-  --audio-driver Dummy \
-  --script "${CLAUDE_SKILL_DIR}/godot/capture.gd" -- \
-  "<scene.tscn>" "<capture-output>/iteration-N"
+mapwright improve <scene> --dry-run                        # propose only
+mapwright improve <scene> --write-scene corrected.tscn     # apply and write
 ```
 
-Confirm that `top_down.png`, `iso_ne.png`, and `iso_sw.png` exist and are non-blank, then open all three. Check:
+`improve` applies only the corrections it can verify, re-analyses, and keeps a
+pass only when the overall score actually rises. Structural findings — a
+missing second route, a single-entrance arena, an absent relief beat — are
+reported as **needs a design decision** rather than faked. Those are yours.
+
+## 6. Capture and look
+
+Numbers miss what a frame shows. Render the views and open them.
+
+```bash
+mapwright capture <scene> --output captures/iteration-1
+```
+
+Do not use Godot `--headless` for 3D capture: it selects a dummy renderer and
+writes blank images. Mapwright's Godot adapter already uses a real driver with
+an off-screen window, and `xvfb-run` on a display-less Linux host. Confirm
+`top_down.png`, `iso_ne.png`, and `iso_sw.png` exist and are not blank, then
+open all three and check:
 
 1. Intentional versus accidental empty regions.
 2. Over-clustering and one-sided visual mass.
-3. Intersections, ground embedding, and tight clearances.
-4. Rows, grids, equal gaps, repeated rotations, and silhouettes.
+3. Intersections, ground embedding, tight clearances.
+4. Rows, grids, equal gaps, repeated rotations, silhouettes.
 5. Landmark hierarchy and visibility from intended approaches.
-6. Entry, exit, paths, optional areas, and negative-space readability.
-7. Occlusion or stacking visible only from one angle.
+6. Entry, exit, optional areas, and negative-space readability.
+7. Occlusion visible from only one angle.
 
-Record each issue with its zone and the view that exposes it. Do not use unsupported judgments such as “looks off.”
+Record each observation as a structured issue with its zone and the view that
+exposes it, using Mapwright's own visual issue codes (`visual_mass_imbalance`,
+`landmark_weakness`, `excessive_repetition`, `poor_silhouette`, `clutter`,
+`empty_zone`, `contrast_problem`, `composition_bias`, `sightline_block`,
+`navigation_readability`). Never write "looks off". Feed them back in with
+`mapwright.review.visual.ingest_observations` so they join the same report.
 
-### 4C. Correct and repeat
+Never claim visual validation unless the final cycle's images were generated
+and actually inspected.
 
-Combine all six reports with the three captures and the zone plan.
+## 7. Iterate, then stop
 
-1. Classify each finding as actionable, intentional/justified, or review-only.
-2. Fix actionable findings with repositioning and redistribution first.
-3. After any scene change, rerun **all six validators and all three captures**. Never validate only the metric being targeted; a spacing fix can create density, navigation, or sightline regressions.
-4. Allow at most **three correction passes** after initial validation: no more than four complete validation cycles.
-5. If material issues remain after pass three, stop, preserve the best verified scene, and report the unresolved trade-offs instead of looping or deleting content to force a pass.
+After any scene change, re-run the **whole** analysis, not the metric you
+targeted: a spacing fix routinely creates a density, navigation, or sightline
+regression. Allow at most three correction passes. If material issues remain,
+stop, keep the best verified scene, and report the unresolved trade-offs
+rather than looping or deleting content to force a pass.
 
-## 5. Report completion
+## 8. Report
 
 Provide:
 
 1. Zone and placement summary.
-2. Before/after table for all six validators using the same thresholds.
-3. Final capture paths and view-by-view assessment.
-4. Correction-pass count and a concise list of moved, replaced, added, or deleted objects. Explicitly state when nothing was deleted.
-5. Intentional validator exceptions and environment/rendering limitations.
+2. Before/after score table, same profile and thresholds both times.
+3. Final capture paths and a view-by-view assessment.
+4. Correction-pass count, and what was moved, replaced, added, or deleted.
+   State explicitly when nothing was deleted.
+5. Findings deliberately not acted on, with the reason.
+6. Environment limits that affected the run — an unavailable renderer, objects
+   without extents, a topology that had to be inferred.
 
-Never claim visual validation unless all three PNGs from the final cycle were generated, opened, and inspected.
+## Working without an engine
+
+Mapwright's analysers never import an engine. A level written as Scene IR
+JSON gets the full pipeline with nothing installed:
+
+```bash
+mapwright analyze level.json
+```
+
+Engine scenes are converted by adapters (`.tscn` → Godot, `.json` → generic,
+`.blend` → Blender). Unity and Unreal have documented import contracts but no
+implementation in v0.2; export those levels to Scene IR JSON instead. See
+`examples/outpost_level.json` for the schema in practice.
+
+## Legacy v0.1 tools
+
+The v0.1 Godot-only scripts under `tools/` still run unchanged and produce
+identical numbers — `tests/test_backward_compatibility.py` pins them together.
+They are deprecated: prefer `mapwright analyze`, which covers the same six
+checks plus flow, pacing, encounter, fairness, scoring, and correction.

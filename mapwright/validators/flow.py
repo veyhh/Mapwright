@@ -11,9 +11,9 @@ from dataclasses import dataclass
 from typing import Any
 
 from mapwright.core.context import AnalysisContext
-from mapwright.core.graph import RouteGraph
+from mapwright.core.graph import RouteGraph, RouteNode
 from mapwright.core.issues import Category, Issue, IssueCollector, Severity
-from mapwright.design.flow import FlowAnalysis, analyze_flow, format_flow
+from mapwright.design.flow import Chokepoint, FlowAnalysis, analyze_flow, format_flow
 
 
 #: Share of journeys that may re-tread earlier ground before it reads as a loop
@@ -54,7 +54,7 @@ def validate_flow(context: AnalysisContext) -> FlowReport:
             context.config.severity_for("no_critical_path", Severity.INFO),
             "Traversal structure could not be measured",
             f"No route graph could be derived for '{context.scene.scene}': "
-            f"{context.graph_reason}.",
+            f"{context.graph_reason.rstrip('.')}.",
             "Declare ground geometry and at least one entry and one objective "
             "marker, then re-run the analysis so flow can be judged instead of "
             "skipped.",
@@ -94,12 +94,19 @@ def format_report(report: FlowReport) -> str:
         lines.append("")
         lines.append(issue.to_text())
         if issue.advisory:
-            lines.append("(advisory: measured from an inferred topology)")
+            lines.append("(advisory finding)")
     return "\n".join(lines)
 
 
+def _place_name(node: RouteNode) -> str:
+    """Return a place name a designer can find, locating sampled waypoints."""
+    if not node.derived:
+        return node.label
+    return f"{node.label} (x {node.position.x:.1f}, z {node.position.z:.1f})"
+
+
 def _label(graph: RouteGraph, node_id: str) -> str:
-    return graph.node(node_id).label
+    return _place_name(graph.node(node_id))
 
 
 def _evidence(text: str, advisory: bool) -> str:
@@ -240,7 +247,11 @@ def _check_chokepoints(
     advisory: bool,
 ) -> None:
     width_limit = context.config.thresholds.chokepoint_width
-    for point in analysis.chokepoints:
+    reportable = analysis.chokepoints
+    if advisory:
+        reportable = analysis.structural_chokepoints
+        _report_inferred_widths(collector, context, analysis, graph, width_limit)
+    for point in reportable:
         edge = point.edge
         source, target = _label(graph, edge.source), _label(graph, edge.target)
         default = (
@@ -298,6 +309,58 @@ def _check_chokepoints(
         )
 
 
+def _report_inferred_widths(
+    collector: IssueCollector,
+    context: AnalysisContext,
+    analysis: FlowAnalysis,
+    graph: RouteGraph,
+    width_limit: float,
+) -> None:
+    """Report narrow inferred routes once, rather than as a finding per waypoint.
+
+    Between sampled waypoints a width measures wherever the sampler happened
+    to land, so naming each one separately would invite a designer to widen
+    passages that were never designed.
+    """
+    narrow: list[Chokepoint] = [
+        point
+        for point in analysis.chokepoints
+        if point.narrow and not point.structural
+    ]
+    if not narrow:
+        return
+    tightest = min(narrow, key=lambda point: (point.edge.width, point.key))
+    source = _label(graph, tightest.edge.source)
+    target = _label(graph, tightest.edge.target)
+    collector.add(
+        "chokepoint",
+        context.config.severity_for("chokepoint", Severity.INFO),
+        f"{len(narrow)} inferred routes are narrower than {width_limit:.2f} m",
+        _evidence(
+            f"{len(narrow)} of the {len(analysis.edge_loads)} inferred route(s) "
+            f"measure under {width_limit:.2f} m; the tightest is {source} -> "
+            f"{target} at {tightest.edge.width:.2f} m, carrying "
+            f"{tightest.load * 100:.0f}% of routed journeys.",
+            True,
+        ),
+        "Declare this level's entries, objectives, exits and zones, then "
+        "re-run so widths are measured along the routes players take; or "
+        f"inspect the tight space around {source} directly and widen it if it "
+        "is meant to be a passage.",
+        explanation=(
+            "Narrow space between sampled waypoints may be a corridor, the gap "
+            "behind a prop, or the edge of the playable area. Until the level "
+            "names its places, these widths cannot be attributed to routes."
+        ),
+        metrics=(
+            ("narrow_routes", float(len(narrow))),
+            ("narrowest_width", round(tightest.edge.width, 3)),
+            ("limit", width_limit),
+        ),
+        advisory=True,
+    )
+
+
 def _check_dead_ends(
     collector: IssueCollector,
     context: AnalysisContext,
@@ -308,8 +371,8 @@ def _check_dead_ends(
     ratio = analysis.dead_end_ratio
     if not analysis.dead_ends or ratio <= limit:
         return
-    names = ", ".join(node.label for node in analysis.dead_ends)
-    first = analysis.dead_ends[0].label
+    names = ", ".join(_place_name(node) for node in analysis.dead_ends)
+    first = _place_name(analysis.dead_ends[0])
     collector.add(
         "dead_end",
         context.config.severity_for("dead_end", Severity.WARNING),
@@ -349,17 +412,18 @@ def _check_isolated(
         return
     main = graph.components()[0]
     for node in analysis.isolated:
+        name = _place_name(node)
         collector.add(
             "isolated_route_node",
             context.config.severity_for("isolated_route_node", Severity.ERROR),
-            f"{node.label} is cut off from the level",
+            f"{name} is cut off from the level",
             _evidence(
-                f"{node.label} has no walkable route to the main body of the "
+                f"{name} has no walkable route to the main body of the "
                 f"level, which holds {len(main)} of {len(graph.nodes)} place(s). "
                 f"It has {graph.degree(node.id)} route(s) of its own.",
                 advisory,
             ),
-            f"Connect {node.label} to the nearest reachable place, or remove it "
+            f"Connect {name} to the nearest reachable place, or remove it "
             "if the space behind it is not meant to be played.",
             explanation=(
                 "A place with no route to the rest of the level cannot be "
@@ -383,13 +447,27 @@ def _check_backtracking(
     graph: RouteGraph,
     advisory: bool,
 ) -> None:
-    if analysis.routed_journeys == 0 or analysis.backtracking_ratio <= BACKTRACKING_LIMIT:
+    if analysis.routed_journeys == 0:
+        return
+    if analysis.backtracking_ratio <= BACKTRACKING_LIMIT:
         return
     if len(analysis.critical_path) >= 2:
         first = _label(graph, analysis.critical_path[0])
         last = _label(graph, analysis.critical_path[-1])
     else:
         first, last = "the start", "the far end"
+    fix = (
+        f"Close a loop between {first} and {last} — a return corridor or a "
+        "one-way drop back to the start — so the journey out and the journey "
+        "back cover different ground."
+    )
+    if advisory:
+        fix = (
+            "Declare the level's entry, objective and exit so re-treading is "
+            "measured against the intended journey rather than every pair of "
+            f"sampled places; the repeated ground lies between {first} and "
+            f"{last}."
+        )
     collector.add(
         "backtracking_risk",
         context.config.severity_for("backtracking_risk", Severity.INFO),
@@ -402,9 +480,7 @@ def _check_backtracking(
             f"{analysis.loops} loop(s).",
             advisory,
         ),
-        f"Close a loop between {first} and {last} — a return corridor or a "
-        "one-way drop back to the start — so the journey out and the journey "
-        "back cover different ground.",
+        fix,
         explanation=(
             "Re-treading is cheap to build and expensive to play: the second "
             "pass through a space has no surprises left, and the level feels "
