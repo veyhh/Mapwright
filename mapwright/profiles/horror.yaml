@@ -1,0 +1,35 @@
+name: horror
+description: >-
+  Confinement is the point. Narrow space, hidden landmarks, and forced routes
+  are design intent here, so the checks that normally flag them stand down and
+  pacing carries the weight instead.
+
+thresholds:
+  # Tight, uneven, forced space is wanted rather than corrected.
+  density_imbalance: 70.0
+  traversal_concentration: 80.0
+  chokepoint_width: 1.2
+  minimum_route_diversity: 1.0
+  dead_end_ratio: 60.0
+  # Relief must still arrive; dread without release flattens.
+  max_consecutive_high: 2.0
+  abrupt_transition_delta: 3.0
+  visual_mass_imbalance: 75.0
+
+weights:
+  pacing: 1.8
+  visual: 1.3
+  flow: 1.1
+  spatial: 0.9
+  navigation: 1.0
+  encounter: 0.7
+  fairness: 0.2
+
+severity_overrides:
+  landmark_never_visible: INFO
+  dead_end: INFO
+  low_route_diversity: INFO
+  traversal_concentration: INFO
+  competing_landmarks: INFO
+  missing_relief: ERROR
+  consecutive_high_intensity: ERROR

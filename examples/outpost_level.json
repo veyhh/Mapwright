@@ -1,0 +1,1227 @@
+{
+  "ir_version": "0.2",
+  "scene": "outpost",
+  "units": "meters",
+  "coordinate_system": "Y_UP",
+  "source_engine": "generic",
+  "objects": [
+    {
+      "id": "ground",
+      "name": "Ground",
+      "type": "ground",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -20.0,
+          -0.2,
+          -15.0
+        ],
+        "max": [
+          20.0,
+          0.0,
+          15.0
+        ]
+      }
+    },
+    {
+      "id": "wall_arrival_n",
+      "name": "ArrivalWallNorth",
+      "type": "structure",
+      "position": [
+        -12.0,
+        0.0,
+        8.25
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.25,
+          0.0,
+          -6.75
+        ],
+        "max": [
+          0.25,
+          4.0,
+          6.75
+        ]
+      },
+      "tags": [
+        "wall"
+      ]
+    },
+    {
+      "id": "wall_arrival_s",
+      "name": "ArrivalWallSouth",
+      "type": "structure",
+      "position": [
+        -12.0,
+        0.0,
+        -8.25
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.25,
+          0.0,
+          -6.75
+        ],
+        "max": [
+          0.25,
+          4.0,
+          6.75
+        ]
+      },
+      "tags": [
+        "wall"
+      ]
+    },
+    {
+      "id": "wall_inner_n",
+      "name": "InnerWallNorth",
+      "type": "structure",
+      "position": [
+        0.0,
+        0.0,
+        8.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.25,
+          0.0,
+          -6.5
+        ],
+        "max": [
+          0.25,
+          4.0,
+          6.5
+        ]
+      },
+      "tags": [
+        "wall"
+      ]
+    },
+    {
+      "id": "wall_inner_s",
+      "name": "InnerWallSouth",
+      "type": "structure",
+      "position": [
+        0.0,
+        0.0,
+        -8.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.25,
+          0.0,
+          -6.5
+        ],
+        "max": [
+          0.25,
+          4.0,
+          6.5
+        ]
+      },
+      "tags": [
+        "wall"
+      ]
+    },
+    {
+      "id": "tunnel_side_n",
+      "name": "TunnelSideNorth",
+      "type": "structure",
+      "position": [
+        4.0,
+        0.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -4.0,
+          0.0,
+          -0.25
+        ],
+        "max": [
+          4.0,
+          4.0,
+          0.25
+        ]
+      },
+      "tags": [
+        "wall"
+      ],
+      "zone": "tunnel"
+    },
+    {
+      "id": "tunnel_side_s",
+      "name": "TunnelSideSouth",
+      "type": "structure",
+      "position": [
+        4.0,
+        0.0,
+        -2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -4.0,
+          0.0,
+          -0.25
+        ],
+        "max": [
+          4.0,
+          4.0,
+          0.25
+        ]
+      },
+      "tags": [
+        "wall"
+      ],
+      "zone": "tunnel"
+    },
+    {
+      "id": "wall_arena_n",
+      "name": "ArenaWallNorth",
+      "type": "structure",
+      "position": [
+        8.0,
+        0.0,
+        8.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.25,
+          0.0,
+          -6.5
+        ],
+        "max": [
+          0.25,
+          4.0,
+          6.5
+        ]
+      },
+      "tags": [
+        "wall"
+      ]
+    },
+    {
+      "id": "wall_arena_s",
+      "name": "ArenaWallSouth",
+      "type": "structure",
+      "position": [
+        8.0,
+        0.0,
+        -8.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.25,
+          0.0,
+          -6.5
+        ],
+        "max": [
+          0.25,
+          4.0,
+          6.5
+        ]
+      },
+      "tags": [
+        "wall"
+      ]
+    },
+    {
+      "id": "signpost",
+      "name": "Signpost",
+      "type": "prop",
+      "position": [
+        -17.0,
+        0.0,
+        3.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.15,
+          0.0,
+          -0.15
+        ],
+        "max": [
+          0.15,
+          2.4,
+          0.15
+        ]
+      },
+      "asset": "props/signpost",
+      "zone": "arrival"
+    },
+    {
+      "id": "crate_arrival",
+      "name": "ArrivalCrate",
+      "type": "cover",
+      "position": [
+        -15.5,
+        0.0,
+        -2.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "arrival"
+    },
+    {
+      "id": "crate_01",
+      "name": "Crate01",
+      "type": "cover",
+      "position": [
+        -3.2,
+        0.0,
+        11.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "courtyard"
+    },
+    {
+      "id": "crate_02",
+      "name": "Crate02",
+      "type": "cover",
+      "position": [
+        -4.4,
+        0.0,
+        10.2
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "courtyard"
+    },
+    {
+      "id": "crate_03",
+      "name": "Crate03",
+      "type": "cover",
+      "position": [
+        -2.1,
+        0.0,
+        9.4
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "courtyard"
+    },
+    {
+      "id": "crate_04",
+      "name": "Crate04",
+      "type": "cover",
+      "position": [
+        -5.1,
+        0.0,
+        11.8
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "courtyard"
+    },
+    {
+      "id": "crate_05",
+      "name": "Crate05",
+      "type": "cover",
+      "position": [
+        -3.9,
+        0.0,
+        12.6
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "courtyard"
+    },
+    {
+      "id": "crate_06",
+      "name": "Crate06",
+      "type": "cover",
+      "position": [
+        -1.6,
+        0.0,
+        11.6
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "courtyard"
+    },
+    {
+      "id": "crate_07",
+      "name": "Crate07",
+      "type": "cover",
+      "position": [
+        -5.8,
+        0.0,
+        9.2
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "courtyard"
+    },
+    {
+      "id": "crate_08",
+      "name": "Crate08",
+      "type": "cover",
+      "position": [
+        -2.6,
+        0.0,
+        13.2
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.5,
+          0.0,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          1.0,
+          0.5
+        ]
+      },
+      "asset": "props/crate",
+      "zone": "courtyard"
+    },
+    {
+      "id": "barrel_a",
+      "name": "BarrelA",
+      "type": "prop",
+      "position": [
+        -7.0,
+        0.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.35,
+          0.0,
+          -0.35
+        ],
+        "max": [
+          0.35,
+          1.1,
+          0.35
+        ]
+      },
+      "asset": "props/barrel",
+      "zone": "courtyard"
+    },
+    {
+      "id": "barrel_b",
+      "name": "BarrelB",
+      "type": "prop",
+      "position": [
+        -7.35,
+        0.0,
+        4.2
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.35,
+          0.0,
+          -0.35
+        ],
+        "max": [
+          0.35,
+          1.1,
+          0.35
+        ]
+      },
+      "asset": "props/barrel",
+      "zone": "courtyard"
+    },
+    {
+      "id": "well",
+      "name": "Well",
+      "type": "landmark",
+      "position": [
+        -8.0,
+        0.0,
+        -6.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -1.2,
+          0.0,
+          -1.2
+        ],
+        "max": [
+          1.2,
+          1.6,
+          1.2
+        ]
+      },
+      "asset": "props/well",
+      "zone": "courtyard"
+    },
+    {
+      "id": "arena_cover_01",
+      "name": "ArenaCover01",
+      "type": "cover",
+      "position": [
+        10.5,
+        0.0,
+        -4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.6,
+          0.0,
+          -0.6
+        ],
+        "max": [
+          0.6,
+          1.1,
+          0.6
+        ]
+      },
+      "asset": "props/barricade",
+      "zone": "arena"
+    },
+    {
+      "id": "arena_cover_02",
+      "name": "ArenaCover02",
+      "type": "cover",
+      "position": [
+        12.0,
+        0.0,
+        -7.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.6,
+          0.0,
+          -0.6
+        ],
+        "max": [
+          0.6,
+          1.1,
+          0.6
+        ]
+      },
+      "asset": "props/barricade",
+      "zone": "arena"
+    },
+    {
+      "id": "arena_cover_03",
+      "name": "ArenaCover03",
+      "type": "cover",
+      "position": [
+        14.5,
+        0.0,
+        -5.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.6,
+          0.0,
+          -0.6
+        ],
+        "max": [
+          0.6,
+          1.1,
+          0.6
+        ]
+      },
+      "asset": "props/barricade",
+      "zone": "arena"
+    },
+    {
+      "id": "arena_cover_04",
+      "name": "ArenaCover04",
+      "type": "cover",
+      "position": [
+        11.0,
+        0.0,
+        -10.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.6,
+          0.0,
+          -0.6
+        ],
+        "max": [
+          0.6,
+          1.1,
+          0.6
+        ]
+      },
+      "asset": "props/barricade",
+      "zone": "arena"
+    },
+    {
+      "id": "arena_cover_05",
+      "name": "ArenaCover05",
+      "type": "cover",
+      "position": [
+        15.5,
+        0.0,
+        -9.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.6,
+          0.0,
+          -0.6
+        ],
+        "max": [
+          0.6,
+          1.1,
+          0.6
+        ]
+      },
+      "asset": "props/barricade",
+      "zone": "arena"
+    },
+    {
+      "id": "arena_cover_06",
+      "name": "ArenaCover06",
+      "type": "cover",
+      "position": [
+        13.0,
+        0.0,
+        -2.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.6,
+          0.0,
+          -0.6
+        ],
+        "max": [
+          0.6,
+          1.1,
+          0.6
+        ]
+      },
+      "asset": "props/barricade",
+      "zone": "arena"
+    },
+    {
+      "id": "tower_01",
+      "name": "Tower01",
+      "type": "structure",
+      "position": [
+        18.5,
+        0.0,
+        -6.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -1.0,
+          0.0,
+          -1.0
+        ],
+        "max": [
+          1.0,
+          7.5,
+          1.0
+        ]
+      },
+      "asset": "structures/tower",
+      "zone": "arena"
+    },
+    {
+      "id": "tower_02",
+      "name": "Tower02",
+      "type": "structure",
+      "position": [
+        18.5,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -1.0,
+          0.0,
+          -1.0
+        ],
+        "max": [
+          1.0,
+          7.5,
+          1.0
+        ]
+      },
+      "asset": "structures/tower",
+      "zone": "arena"
+    },
+    {
+      "id": "tower_03",
+      "name": "Tower03",
+      "type": "structure",
+      "position": [
+        18.5,
+        0.0,
+        6.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -1.0,
+          0.0,
+          -1.0
+        ],
+        "max": [
+          1.0,
+          7.5,
+          1.0
+        ]
+      },
+      "asset": "structures/tower",
+      "zone": "arena"
+    },
+    {
+      "id": "tower_04",
+      "name": "Tower04",
+      "type": "structure",
+      "position": [
+        17.0,
+        0.0,
+        11.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -1.0,
+          0.0,
+          -1.0
+        ],
+        "max": [
+          1.0,
+          7.5,
+          1.0
+        ]
+      },
+      "asset": "structures/tower",
+      "zone": "arena"
+    }
+  ],
+  "zones": [
+    {
+      "name": "arrival",
+      "type": "entry",
+      "pacing": "calm",
+      "bounds": {
+        "min": [
+          -20.0,
+          0.0,
+          -15.0
+        ],
+        "max": [
+          -12.0,
+          6.0,
+          15.0
+        ]
+      },
+      "description": "Quiet approach where the player gets their bearings."
+    },
+    {
+      "name": "courtyard",
+      "type": "exploration",
+      "pacing": "medium",
+      "bounds": {
+        "min": [
+          -12.0,
+          0.0,
+          -15.0
+        ],
+        "max": [
+          0.0,
+          6.0,
+          15.0
+        ]
+      },
+      "description": "Open ground with optional content and the first landmark."
+    },
+    {
+      "name": "tunnel",
+      "type": "tension",
+      "pacing": "high",
+      "bounds": {
+        "min": [
+          0.0,
+          0.0,
+          -2.5
+        ],
+        "max": [
+          8.0,
+          6.0,
+          2.5
+        ]
+      },
+      "description": "Tight, committed passage toward the objective."
+    },
+    {
+      "name": "arena",
+      "type": "combat",
+      "pacing": "intense",
+      "bounds": {
+        "min": [
+          8.0,
+          0.0,
+          -15.0
+        ],
+        "max": [
+          20.0,
+          8.0,
+          15.0
+        ]
+      },
+      "description": "The main fight around the objective."
+    }
+  ],
+  "entry_points": [
+    {
+      "id": "entry_gate",
+      "name": "Gate",
+      "position": [
+        -17.0,
+        0.0,
+        0.0
+      ],
+      "zone": "arrival"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "objective_relay",
+      "name": "Relay",
+      "position": [
+        13.0,
+        0.0,
+        6.0
+      ],
+      "zone": "arena"
+    }
+  ],
+  "exits": [
+    {
+      "id": "exit_north",
+      "name": "North Exit",
+      "position": [
+        18.0,
+        0.0,
+        13.0
+      ],
+      "zone": "arena"
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "landmark_well",
+      "name": "Well",
+      "position": [
+        -8.0,
+        0.0,
+        -6.0
+      ],
+      "zone": "courtyard"
+    }
+  ]
+}

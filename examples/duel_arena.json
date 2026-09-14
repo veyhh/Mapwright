@@ -1,0 +1,361 @@
+{
+  "ir_version": "0.2",
+  "scene": "duel_arena",
+  "units": "meters",
+  "coordinate_system": "Y_UP",
+  "source_engine": "generic",
+  "objects": [
+    {
+      "id": "ground",
+      "name": "Ground",
+      "type": "ground",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -16.0,
+          -0.2,
+          -11.0
+        ],
+        "max": [
+          16.0,
+          0.0,
+          11.0
+        ]
+      }
+    },
+    {
+      "id": "cover_a_1",
+      "name": "CoverA1",
+      "type": "cover",
+      "position": [
+        -6.0,
+        0.0,
+        -6.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.7,
+          0.0,
+          -0.7
+        ],
+        "max": [
+          0.7,
+          1.2,
+          0.7
+        ]
+      },
+      "asset": "props/barricade"
+    },
+    {
+      "id": "cover_a_2",
+      "name": "CoverA2",
+      "type": "cover",
+      "position": [
+        -6.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.7,
+          0.0,
+          -0.7
+        ],
+        "max": [
+          0.7,
+          1.2,
+          0.7
+        ]
+      },
+      "asset": "props/barricade"
+    },
+    {
+      "id": "cover_a_3",
+      "name": "CoverA3",
+      "type": "cover",
+      "position": [
+        -6.0,
+        0.0,
+        6.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.7,
+          0.0,
+          -0.7
+        ],
+        "max": [
+          0.7,
+          1.2,
+          0.7
+        ]
+      },
+      "asset": "props/barricade"
+    },
+    {
+      "id": "cover_b_1",
+      "name": "CoverB1",
+      "type": "cover",
+      "position": [
+        6.0,
+        0.0,
+        -6.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.7,
+          0.0,
+          -0.7
+        ],
+        "max": [
+          0.7,
+          1.2,
+          0.7
+        ]
+      },
+      "asset": "props/barricade"
+    },
+    {
+      "id": "cover_b_2",
+      "name": "CoverB2",
+      "type": "cover",
+      "position": [
+        6.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.7,
+          0.0,
+          -0.7
+        ],
+        "max": [
+          0.7,
+          1.2,
+          0.7
+        ]
+      },
+      "asset": "props/barricade"
+    },
+    {
+      "id": "cover_b_3",
+      "name": "CoverB3",
+      "type": "cover",
+      "position": [
+        6.0,
+        0.0,
+        6.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.7,
+          0.0,
+          -0.7
+        ],
+        "max": [
+          0.7,
+          1.2,
+          0.7
+        ]
+      },
+      "asset": "props/barricade"
+    },
+    {
+      "id": "centre_pillar",
+      "name": "CentrePillar",
+      "type": "structure",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -1.0,
+          0.0,
+          -1.0
+        ],
+        "max": [
+          1.0,
+          5.0,
+          1.0
+        ]
+      },
+      "asset": "structures/pillar"
+    },
+    {
+      "id": "screen_b",
+      "name": "ScreenB",
+      "type": "structure",
+      "position": [
+        10.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "bounds": {
+        "min": [
+          -0.3,
+          0.0,
+          -6.0
+        ],
+        "max": [
+          0.3,
+          3.0,
+          6.0
+        ]
+      },
+      "tags": [
+        "wall"
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "centre",
+      "type": "objective",
+      "pacing": "intense",
+      "bounds": {
+        "min": [
+          -5.0,
+          0.0,
+          -6.0
+        ],
+        "max": [
+          5.0,
+          6.0,
+          6.0
+        ]
+      },
+      "description": "Contested centre both teams must hold."
+    }
+  ],
+  "spawn_points": [
+    {
+      "id": "spawn_a",
+      "name": "Team A Spawn",
+      "position": [
+        -14.0,
+        0.0,
+        0.0
+      ],
+      "team": "A"
+    },
+    {
+      "id": "spawn_b",
+      "name": "Team B Spawn",
+      "position": [
+        14.0,
+        0.0,
+        0.0
+      ],
+      "team": "B"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "objective_centre",
+      "name": "Centre Objective",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "zone": "centre"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mapwright"
+version = "0.2.0"
+description = "Engine-agnostic level design director for AI coding agents"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0,<7.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+mapwright = "mapwright.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["mapwright*"]
+
+[tool.setuptools.package-data]
+mapwright = ["profiles/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

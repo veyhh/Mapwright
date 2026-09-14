@@ -1,0 +1,32 @@
+name: platformer
+description: >-
+  Gaps are content, not defects. Ground connectivity checks stand down because
+  islands are intentional, while reachability and readable silhouettes decide
+  whether a jump reads before it is attempted.
+
+thresholds:
+  # Separate platforms are the level; continuous floor is not expected.
+  navigation_minimum_region_area: 2.0
+  minimum_route_diversity: 1.0
+  traversal_concentration: 75.0
+  dead_end_ratio: 55.0
+  chokepoint_width: 1.0
+  density_imbalance: 68.0
+  visual_mass_imbalance: 60.0
+
+weights:
+  navigation: 1.5
+  visual: 1.4
+  spatial: 1.2
+  flow: 1.0
+  pacing: 1.0
+  encounter: 0.5
+  fairness: 0.2
+
+severity_overrides:
+  disconnected_regions: INFO
+  narrow_clearance: INFO
+  dead_end: INFO
+  prop_unreachable: INFO
+  untraversable_gap: ERROR
+  landmark_never_visible: WARNING

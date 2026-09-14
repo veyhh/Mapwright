@@ -1,0 +1,31 @@
+name: stealth
+description: >-
+  The player needs choices and cover. Alternate routes, dense usable cover, and
+  broken sightlines matter more than symmetry or spectacle.
+
+thresholds:
+  minimum_route_diversity: 3.0
+  traversal_concentration: 40.0
+  chokepoint_width: 1.8
+  cover_height_min: 0.9
+  cover_height_max: 2.2
+  high_ground_delta: 1.0
+  minimum_encounter_entrances: 3.0
+  minimum_flank_routes: 2.0
+  density_imbalance: 60.0
+
+weights:
+  flow: 1.7
+  encounter: 1.4
+  navigation: 1.2
+  visual: 1.1
+  spatial: 1.0
+  pacing: 1.0
+  fairness: 0.4
+
+severity_overrides:
+  low_route_diversity: ERROR
+  traversal_concentration: ERROR
+  poor_cover_distribution: ERROR
+  no_flank_route: ERROR
+  landmark_never_visible: INFO

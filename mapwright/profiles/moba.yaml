@@ -1,0 +1,34 @@
+name: moba
+description: >-
+  Competitive symmetry decides the match before it starts. Travel time, choke
+  width, and objective access must be near-identical for every team, and the
+  tolerances are far tighter than any single-player profile.
+
+thresholds:
+  travel_time_asymmetry: 5.0
+  cover_asymmetry: 10.0
+  choke_width_asymmetry: 10.0
+  minimum_route_diversity: 3.0
+  traversal_concentration: 45.0
+  chokepoint_width: 3.0
+  minimum_encounter_entrances: 3.0
+  minimum_flank_routes: 2.0
+  high_ground_delta: 1.0
+
+weights:
+  fairness: 2.5
+  flow: 1.5
+  encounter: 1.3
+  navigation: 1.2
+  spatial: 0.8
+  visual: 0.7
+  pacing: 0.4
+
+severity_overrides:
+  travel_time_imbalance: CRITICAL
+  objective_access_imbalance: CRITICAL
+  choke_width_imbalance: ERROR
+  cover_imbalance: ERROR
+  high_ground_advantage: ERROR
+  flank_route_imbalance: ERROR
+  low_route_diversity: ERROR
