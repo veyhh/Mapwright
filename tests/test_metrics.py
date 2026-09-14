@@ -97,6 +97,56 @@ def test_measured_passage_width_matches_the_modelled_doorway():
     assert measure_passage_width(grid, cells) == pytest.approx(2.0, abs=0.05)
 
 
+def test_width_is_the_same_measured_from_either_end_of_a_mirrored_route():
+    """A layout mirrored about the centre must not report an asymmetry.
+
+    The widest-path search has to break ties between equally wide routes. Cell
+    index runs west to east, so breaking ties that way makes the two halves of
+    a symmetric map choose opposite detours and measure different bottlenecks
+    — which a fairness report then blames on the level.
+    """
+    scene = SceneIR(
+        scene="mirrored",
+        objects=(
+            ground(width=24.0, depth=12.0),
+            block("pillar_west", -5.0, 0.0, 2.0, 2.0),
+            block("pillar_east", 5.0, 0.0, 2.0, 2.0),
+        ),
+    )
+    grid = build_occupancy_grid(scene, 0.25, 0.45)
+    field = grid.clearance_field()
+    centre = grid.nearest_free_cell(Vec3(0.0, 0.0, 0.0))
+    west = grid.nearest_free_cell(Vec3(-10.0, 0.0, 0.0))
+    east = grid.nearest_free_cell(Vec3(10.0, 0.0, 0.0))
+
+    west_cells, _ = grid.widest_path(centre, west, field)
+    east_cells, _ = grid.widest_path(centre, east, field)
+    assert measure_passage_width(grid, west_cells) == pytest.approx(
+        measure_passage_width(grid, east_cells)
+    )
+
+
+def test_endpoint_surroundings_do_not_decide_a_route_width():
+    """A node standing in a notch must not make the hall beyond look narrow."""
+    scene = SceneIR(
+        scene="notched_hall",
+        objects=(
+            ground(width=24.0, depth=12.0),
+            block("jaw_north", -9.0, 2.0, 2.0, 2.0),
+            block("jaw_south", -9.0, -2.0, 2.0, 2.0),
+        ),
+    )
+    grid = build_occupancy_grid(scene, 0.25, 0.45)
+    field = grid.clearance_field()
+    start = grid.nearest_free_cell(Vec3(-9.0, 0.0, 0.0))
+    goal = grid.nearest_free_cell(Vec3(9.0, 0.0, 0.0))
+    cells, _ = grid.widest_path(start, goal, field)
+
+    # The notch between the jaws is 2 m across; the hall east of them is not.
+    assert measure_passage_width(grid, cells) == pytest.approx(2.0, abs=0.3)
+    assert measure_passage_width(grid, cells, endpoint_margin=3.0) > 4.0
+
+
 def test_clearance_is_measured_from_geometry_not_grid_cells():
     scene = split_scene(gap=3.0)
     grid = build_occupancy_grid(scene, 0.25, 0.45)

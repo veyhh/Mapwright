@@ -324,15 +324,23 @@ class OccupancyGrid:
         corner rather than the corridor. Maximising the minimum clearance
         instead answers the question a designer asks: at its narrowest, how
         much room does the best way through actually leave?
+
+        Equally wide routes are separated by length, not by cell index. Index
+        order runs west-to-east, so on a mirrored map the two sides would break
+        ties in opposite directions and a symmetric layout would report an
+        asymmetry it does not have.
         """
         if not self.is_free(*start) or not self.is_free(*goal):
             return (), 0.0
-        best = {start: clearance[start[1]][start[0]]}
+        start_width = clearance[start[1]][start[0]]
+        best: dict[tuple[int, int], tuple[float, float]] = {start: (start_width, 0.0)}
         previous: dict[tuple[int, int], tuple[int, int]] = {}
-        queue: list[tuple[float, tuple[int, int]]] = [(-best[start], start)]
+        queue: list[tuple[float, float, tuple[int, int]]] = [
+            (-start_width, 0.0, start)
+        ]
         visited: set[tuple[int, int]] = set()
         while queue:
-            negated, cell = heapq.heappop(queue)
+            negated, travelled, cell = heapq.heappop(queue)
             if cell in visited:
                 continue
             visited.add(cell)
@@ -343,13 +351,20 @@ class OccupancyGrid:
                     cells.append(previous[cells[-1]])
                 cells.reverse()
                 return tuple(cells), bottleneck
-            for next_column, next_row, _ in self.neighbors(*cell):
+            for next_column, next_row, cost in self.neighbors(*cell):
                 key = (next_column, next_row)
-                candidate = min(bottleneck, clearance[next_row][next_column])
-                if candidate > best.get(key, -math.inf):
+                candidate = (
+                    min(bottleneck, clearance[next_row][next_column]),
+                    travelled + cost,
+                )
+                known = best.get(key)
+                if known is None or (-candidate[0], candidate[1]) < (
+                    -known[0],
+                    known[1],
+                ):
                     best[key] = candidate
                     previous[key] = cell
-                    heapq.heappush(queue, (-candidate, key))
+                    heapq.heappush(queue, (-candidate[0], candidate[1], key))
         return (), 0.0
 
     def voronoi_labels(
@@ -502,11 +517,22 @@ def clearance_at(
 
 
 def measure_passage_width(
-    grid: OccupancyGrid, cells: Sequence[tuple[int, int]]
+    grid: OccupancyGrid,
+    cells: Sequence[tuple[int, int]],
+    endpoint_margin: float = 0.0,
 ) -> float:
-    """Return the narrowest physical width along a route, in metres."""
+    """Return the narrowest physical width along a route, in metres.
+
+    ``endpoint_margin`` metres are ignored at each end. A route's endpoints are
+    sample points — a zone's centre, a marker someone dropped next to a rock —
+    and their own surroundings say nothing about the passage between them. Left
+    in, one node sitting in a crevice makes every route touching it look like a
+    squeeze. Very short routes keep their full length rather than measuring
+    nothing.
+    """
     if not cells:
         return 0.0
+    interior = _trim_endpoints(grid, cells, endpoint_margin)
     narrowest = min(
         clearance_at(
             grid.cell_center(column, row).x,
@@ -514,9 +540,44 @@ def measure_passage_width(
             grid.footprints,
             grid.ground,
         )
-        for column, row in cells
+        for column, row in interior
     )
-    return narrowest * 2.0
+    # Clearance is exact, but it is sampled at cell centres, so the width is
+    # only known to the grid's resolution. Reporting the raw figure would
+    # claim precision the sampling does not have — and on a mirrored map it
+    # shows up as a fraction of a percent of phantom asymmetry, because two
+    # mirror-image routes break path ties differently. Floor rather than
+    # round: never claim more room than was measured.
+    resolution = min(grid.cell_width, grid.cell_depth)
+    if resolution <= 0:
+        return narrowest * 2.0
+    return math.floor(narrowest * 2.0 / resolution) * resolution
+
+
+def _trim_endpoints(
+    grid: OccupancyGrid, cells: Sequence[tuple[int, int]], margin: float
+) -> Sequence[tuple[int, int]]:
+    """Drop the cells within ``margin`` metres of either end of a route.
+
+    Selected by world distance rather than by index: two mirror-image routes
+    must yield mirror-image interiors, and trimming a fixed number of cells
+    does not survive a grid whose discretization differs by one step between
+    the two sides.
+    """
+    if margin <= 0.0 or len(cells) < 3:
+        return cells
+    start = grid.cell_center(*cells[0])
+    end = grid.cell_center(*cells[-1])
+    interior = tuple(
+        cell
+        for cell in cells
+        if min(
+            grid.cell_center(*cell).distance_xz(start),
+            grid.cell_center(*cell).distance_xz(end),
+        )
+        >= margin
+    )
+    return interior or (cells[len(cells) // 2],)
 
 
 def render_occupancy_map(

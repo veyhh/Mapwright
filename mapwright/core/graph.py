@@ -375,7 +375,7 @@ def build_route_graph(
         anchors.extend(
             _sample_waypoints(grid, field, anchors, minimum_nodes - declared)
         )
-    nodes = _snap_nodes(grid, anchors)
+    nodes = _snap_nodes(grid, anchors, field)
     if len(nodes) < 2:
         raise GraphError(
             "Route analysis needs at least two reachable places; the scene "
@@ -398,7 +398,9 @@ def build_route_graph(
                 source=source.id,
                 target=target.id,
                 distance=path.length,
-                width=measure_passage_width(grid, widest),
+                width=measure_passage_width(
+                    grid, widest, endpoint_margin=grid.agent_radius * 2.0
+                ),
                 travel_time=path.length / walk_speed,
                 elevation_change=abs(source.position.y - target.position.y),
                 directness=straight / path.length if path.length > 0 else 1.0,
@@ -423,6 +425,9 @@ class _Anchor:
     zone: str | None = None
     team: str | None = None
     derived: bool = False
+    #: How far this point may be nudged to find standing room, in metres. Zero
+    #: for a declared marker: the designer placed it, so it does not move.
+    reach: float = 0.0
 
 
 def _collect_anchors(scene: SceneIR) -> list[_Anchor]:
@@ -461,6 +466,7 @@ def _collect_anchors(scene: SceneIR) -> list[_Anchor]:
                 position=center,
                 label=zone.name,
                 zone=zone.name,
+                reach=min(zone.bounds.width, zone.bounds.depth) * 0.25,
             )
         )
     return anchors
@@ -526,17 +532,25 @@ def _sample_waypoints(
                 position=grid.cell_center(*cell),
                 label=f"waypoint {index}",
                 derived=True,
+                reach=grid.agent_radius * 4.0,
             )
         )
     return sampled
 
 
-def _snap_nodes(grid: OccupancyGrid, anchors: Sequence[_Anchor]) -> list[RouteNode]:
+def _snap_nodes(
+    grid: OccupancyGrid,
+    anchors: Sequence[_Anchor],
+    clearance: Sequence[Sequence[float]] | None = None,
+) -> list[RouteNode]:
     """Snap every anchor onto walkable ground, dropping duplicates."""
     nodes: list[RouteNode] = []
     used: set[tuple[int, int]] = set()
     for anchor in anchors:
-        cell = grid.nearest_free_cell(anchor.position)
+        if anchor.reach > 0.0 and clearance is not None:
+            cell = _open_cell_near(grid, clearance, anchor.position, anchor.reach)
+        else:
+            cell = grid.nearest_free_cell(anchor.position)
         if cell is None or cell in used:
             continue
         used.add(cell)
@@ -553,6 +567,42 @@ def _snap_nodes(grid: OccupancyGrid, anchors: Sequence[_Anchor]) -> list[RouteNo
             )
         )
     return nodes
+
+
+def _open_cell_near(
+    grid: OccupancyGrid,
+    clearance: Sequence[Sequence[float]],
+    position: Vec3,
+    reach: float,
+) -> tuple[int, int] | None:
+    """Return somewhere near a point with room to stand.
+
+    A zone's bounding-box centre lands wherever the box says, which on a real
+    level is often inside a rock. Every route touching such a node would then
+    report the node's own crevice as the width of the corridor. Declared
+    markers are never moved this way — only the points Mapwright picked
+    itself, and only within ``reach`` metres so a zone's node stays in its zone.
+    """
+    fallback = grid.nearest_free_cell(position)
+    if fallback is None:
+        return None
+    columns = max(1, int(reach / grid.cell_width))
+    rows = max(1, int(reach / grid.cell_depth))
+    center_column, center_row = grid.cell_of(position)
+    best: tuple[int, int] | None = None
+    best_key = (-math.inf, -math.inf, -math.inf, -math.inf)
+    for row in range(center_row - rows, center_row + rows + 1):
+        for column in range(center_column - columns, center_column + columns + 1):
+            if not grid.is_free(column, row):
+                continue
+            room = clearance[row][column]
+            distance = grid.cell_center(column, row).distance_xz(position)
+            if distance > reach:
+                continue
+            key = (round(room, 6), -distance, -row, -column)
+            if key > best_key:
+                best_key, best = key, (column, row)
+    return best or fallback
 
 
 def _adjacent_owners(

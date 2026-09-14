@@ -1,6 +1,6 @@
 # Mapwright
 
-![engine-agnostic](docs/badges/engine-agnostic.svg) ![Python 3.10+](docs/badges/python-310.svg) ![MIT License](docs/badges/license-mit.svg) ![11 analyzers](docs/badges/analyzers-11.svg) ![229 tests](docs/badges/tests-229.svg)
+![engine-agnostic](docs/badges/engine-agnostic.svg) ![Python 3.10+](docs/badges/python-310.svg) ![MIT License](docs/badges/license-mit.svg) ![11 analyzers](docs/badges/analyzers-11.svg) ![232 tests](docs/badges/tests-232.svg)
 
 **Engine-agnostic level design director for AI coding agents.** Mapwright plans, builds, evaluates, and iteratively improves playable spaces using measurable spatial, gameplay, flow, and visual checks.
 
@@ -268,7 +268,7 @@ Two deliberate differences, both documented above: v0.1 raised an exception on a
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest tests/ -q        # 229 tests
+python -m pytest tests/ -q        # 232 tests
 ```
 
 The suite covers Scene IR round-tripping and validation, the exact distance transform against brute force, route-graph topology, adapter detection and surgical export, every analyzer, scoring, correction application, v0.1 parity, and the full analyze → correct → re-analyze loop.

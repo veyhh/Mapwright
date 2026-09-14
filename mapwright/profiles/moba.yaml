@@ -5,6 +5,10 @@ description: >-
   tolerances are far tighter than any single-player profile.
 
 thresholds:
+  # A competitive map is built from repeated modular terrain on purpose, and
+  # mirroring doubles every placement before a designer has repeated anything.
+  # The default 5% bar fires on every asset a symmetric layout uses.
+  repetition_percent: 20.0
   travel_time_asymmetry: 5.0
   cover_asymmetry: 10.0
   choke_width_asymmetry: 10.0
