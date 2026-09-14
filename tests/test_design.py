@@ -383,6 +383,26 @@ def test_a_calm_to_intense_jump_is_abrupt():
     assert issues[0].zone == "ambush"
 
 
+def test_a_two_step_change_is_already_abrupt_at_the_default_limit():
+    """A calm zone opening straight onto a medium one is judged abrupt.
+
+    The default profile treats a change of two intensity steps as abrupt, so a
+    calm -> medium -> intense -> calm shape is three findings, not a clean bill.
+    """
+    analysed = context(
+        paced_scene(
+            ("entry_hall", ZoneType.ENTRY, PacingLevel.CALM),
+            ("gallery", ZoneType.TRAVERSAL, PacingLevel.MEDIUM),
+            ("cellars", ZoneType.EXPLORATION, PacingLevel.LOW),
+            ("courtyard", ZoneType.RELIEF, PacingLevel.CALM),
+        )
+    )
+    issues = validate_pacing(analysed).issues
+    assert analysed.config.thresholds.abrupt_transition_delta == 2.0
+    assert codes(issues) == {"abrupt_transition"}
+    assert issues[0].metric("delta") == 2.0
+
+
 def test_one_intensity_throughout_reads_as_a_flat_curve():
     scene = paced_scene(
         ("hall", ZoneType.EXPLORATION, PacingLevel.MEDIUM),

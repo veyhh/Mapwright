@@ -15,6 +15,11 @@ from mapwright.core.metrics import OccupancyGrid, clearance_at
 from mapwright.core.scene_ir import MarkerPoint, SceneIR, SceneObject, Zone
 
 
+#: Smallest top surface that reads as a position rather than a foothold.
+#: A one-metre crate clears the height test; standing on it is not high ground.
+MINIMUM_STAND_AREA = 2.0
+
+
 @dataclass(frozen=True)
 class ZoneSummary:
     """What one zone actually contains, measured rather than declared."""
@@ -113,7 +118,10 @@ def summarize_zone(
             cover.append(obj)
         if height >= maximum_cover:
             tall.append(obj)
-        if box.max.y - ground_height >= high_ground_delta and box.area_xz >= 1.0:
+        if (
+            box.max.y - ground_height >= high_ground_delta
+            and box.area_xz >= MINIMUM_STAND_AREA
+        ):
             highest_stand = max(highest_stand, box.max.y)
 
     return ZoneSummary(

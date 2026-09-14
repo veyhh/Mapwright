@@ -206,7 +206,9 @@ def _check_transitions(
             )
         collector.add(
             "abrupt_transition",
-            context.config.severity_for("abrupt_transition", Severity.WARNING),
+            # A skipped intensity step is worth noticing, not correcting: a
+            # calm arrival opening onto a medium space clears this bar too.
+            context.config.severity_for("abrupt_transition", Severity.INFO),
             f"Abrupt pacing step from {step.from_zone} to {step.to_zone}",
             f"{step.from_zone} ({step.from_intensity}) to {step.to_zone} "
             f"({step.to_intensity}) changes intensity by {step.delta:+d} in one "

@@ -24,14 +24,14 @@ Mapwright analysis: outpost (generic, profile generic)
 Spatial Quality      26
 Flow                 75
 Navigation           100
-Pacing               84
+Pacing               90
 Encounter            82
 Fairness             n/a (Fairness analysis needs spawn points for two or more teams.)
 Visual Readability   83
 
-Overall score:       75 / 100
+Overall score:       76 / 100
 
-REVIEW — score 75/100, 30 warning(s)
+REVIEW — score 76/100, 29 warning(s)
 
 WARNING  chokepoint
          courtyard -> tunnel is the only route between two halves of the level
@@ -57,12 +57,12 @@ $ mapwright improve examples/outpost_level.json
 Spatial Quality      26 -> 54 (+28)
 Flow                 75 -> 78 (+3)
 Navigation           100 -> 97 (-3)
-Pacing               84 -> 84 (+0)
+Pacing               90 -> 90 (+0)
 Encounter            82 -> 82 (+0)
 Fairness             n/a -> n/a
 Visual Readability   83 -> 88 (+5)
 
-Overall score:       75 -> 81 (+6)
+Overall score:       76 -> 82 (+6)
 ```
 
 Three passes, 11 corrections applied, 9 rejected after measurement, 33 findings down to 23. Every applied change was verified to raise the score on its own; the ones that traded one finding for another were reported and discarded. The navigation dip is real and reported rather than hidden — moving props to relieve crowding cost a little clearance elsewhere.

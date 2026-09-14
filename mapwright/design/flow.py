@@ -301,13 +301,36 @@ def _path_cost(
 
 
 def _route_diversity(graph: RouteGraph, pairs: Sequence[tuple[str, str]]) -> int:
-    """Return the fewest edge-disjoint routes any routable journey can call on."""
-    counts = [
-        graph.edge_disjoint_paths(source, target)
-        for source, target in pairs
-        if source != target and graph.shortest_path(source, target)[0]
-    ]
+    """Return the fewest edge-disjoint routes any routable journey can call on.
+
+    Measured between the first branching place at each end rather than the
+    declared endpoints. An entry marker attaches to the level by one edge, so
+    counting from the marker itself would report a single route for every
+    annotated level however many corridors run between the two ends — an
+    answer about how the marker is pinned on, not about the level.
+    """
+    counts = []
+    for source, target in pairs:
+        if source == target or not graph.shortest_path(source, target)[0]:
+            continue
+        inner_source = _first_branch(graph, source, toward=target)
+        inner_target = _first_branch(graph, target, toward=source)
+        if inner_source == inner_target:
+            counts.append(1)
+            continue
+        counts.append(graph.edge_disjoint_paths(inner_source, inner_target))
     return min(counts) if counts else 0
+
+
+def _first_branch(graph: RouteGraph, start: str, toward: str) -> str:
+    """Walk off a dead-end tail to the first place that offers a choice."""
+    path, _ = graph.shortest_path(start, toward)
+    current = start
+    for step in path[1:]:
+        if graph.degree(current) > 1:
+            break
+        current = step
+    return current
 
 
 def _isolated_nodes(graph: RouteGraph) -> tuple[RouteNode, ...]:

@@ -83,7 +83,7 @@ def pillar(identifier: str, x: float, z: float, height: float) -> SceneObject:
 
 TOWER_HEIGHT = 4.0
 STUB_HEIGHT = 0.5
-TOWERS = ((-4.0,), (-2.0,), (0.0,), (2.0,), (4.0,))
+TOWERS = (-4.0, -2.0, 0.0, 2.0, 4.0)
 STUBS = (-3.0, 3.0)
 
 
@@ -91,7 +91,7 @@ def lopsided_scene() -> SceneIR:
     """A 20x12 level whose five tall props all stand on the east side."""
     towers = [
         pillar(f"tower_{index}", 6.0, z, TOWER_HEIGHT)
-        for index, (z,) in enumerate(TOWERS)
+        for index, z in enumerate(TOWERS)
     ]
     stubs = [
         pillar(f"stub_{index}", -6.0, z, STUB_HEIGHT) for index, z in enumerate(STUBS)
