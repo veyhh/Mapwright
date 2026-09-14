@@ -1,0 +1,19 @@
+name: generic
+description: >-
+  Engine-agnostic defaults with no genre bias. Every category is weighted
+  equally and no finding is raised or lowered. Copy this file as the starting
+  point for a profile of your own.
+
+# No overrides: the built-in thresholds in mapwright/core/config.py apply.
+thresholds: {}
+
+weights:
+  spatial: 1.0
+  flow: 1.0
+  navigation: 1.0
+  pacing: 1.0
+  encounter: 1.0
+  fairness: 1.0
+  visual: 1.0
+
+severity_overrides: {}

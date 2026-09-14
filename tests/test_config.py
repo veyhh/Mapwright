@@ -28,6 +28,7 @@ def test_every_shipped_profile_loads():
     assert set(profiles) == {
         "exploration",
         "fps",
+        "generic",
         "horror",
         "moba",
         "platformer",
